@@ -1,0 +1,4 @@
+This directory contains sources mostly copied from libguestfs.
+The sources were trimmed to contain only what is used by virt-p2v.
+
+Fixes ought to be sent also to libguestfs, to avoid diverging from libguestfs.

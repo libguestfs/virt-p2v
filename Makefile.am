@@ -38,6 +38,7 @@ EXTRA_DIST = \
 	kiwi-config.sh \
 	kiwi-config.xml.in \
 	launch-virt-p2v \
+	libguestfs/README \
 	miniexpect/README \
 	p2v.ks.in \
 	p2v.service \
