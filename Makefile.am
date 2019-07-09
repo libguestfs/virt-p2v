@@ -17,15 +17,19 @@
 
 include $(top_srcdir)/subdir-rules.mk
 
-generator_built = \
-	AUTHORS
+ACLOCAL_AMFLAGS = -I m4
 
-BUILT_SOURCES = \
-	$(generator_built)
+SUBDIRS = gnulib/lib
+if ENABLE_GNULIB_TESTS
+SUBDIRS += gnulib/tests
+endif
 
 EXTRA_DIST = \
 	$(BUILT_SOURCES) \
-	$(TESTS) $(APPLIANCE_TESTS) $(SLOW_TESTS) \
+	$(TESTS) $(LIBGUESTFS_TESTS) $(SLOW_TESTS) \
+	AUTHORS \
+	autogen.sh \
+	bootstrap \
 	contrib/aux-scripts/do-build.sh \
 	contrib/build-p2v-iso.sh \
 	contrib/patches/0001-RHEL-5-ONLY-DISABLE-AUTOMATIC-REMOTE-PORT-ALLOCATION.patch \
@@ -42,6 +46,8 @@ EXTRA_DIST = \
 	miniexpect/README \
 	p2v.ks.in \
 	p2v.service \
+	podcheck.pl \
+	test-functions.sh \
 	test-virt-p2v-docs.sh \
 	test-virt-p2v-pxe.sshd_config.in \
 	test-virt-p2v-scp.sh \
@@ -70,7 +76,8 @@ CLEANFILES += \
 	test-virt-p2v-pxe.sshd_config \
 	virt-p2v.img \
 	virt-p2v-kernel-config.pod \
-	virt-p2v.xz
+	virt-p2v.xz \
+	website/*.html
 
 # Although virt-p2v is a regular binary, it is not usually installed
 # in /usr/bin since it only functions when contained in an ISO or PXE
@@ -90,6 +97,14 @@ virt-p2v.xz: virt-p2v
 noinst_PROGRAMS = virt-p2v
 
 virt_p2v_SOURCES = \
+	miniexpect/miniexpect.c \
+	miniexpect/miniexpect.h \
+	libguestfs/cleanups.c \
+	libguestfs/cleanups.h \
+	libguestfs/guestfs-utils.c \
+	libguestfs/guestfs-utils.h \
+	libguestfs/libxml2-cleanups.c \
+	libguestfs/libxml2-writer-macros.h \
 	conversion.c \
 	cpuid.c \
 	gui.c \
@@ -119,10 +134,9 @@ nodist_virt_p2v_SOURCES = \
 
 virt_p2v_CPPFLAGS = \
 	-DLOCALEBASEDIR=\""$(datadir)/locale"\" \
-	-I$(top_srcdir)/common/utils -I$(top_builddir)/common/utils \
-	-I$(top_srcdir)/lib -I$(top_builddir)/lib \
-	-I$(top_srcdir)/common/miniexpect -I$(top_builddir)/common/miniexpect \
-	-I$(srcdir)/../gnulib/lib -I../gnulib/lib
+	-I$(srcdir)/libguestfs \
+	-I$(srcdir)/miniexpect \
+	-I$(srcdir)/gnulib/lib -Ignulib/lib
 
 virt_p2v_CFLAGS = \
 	-pthread \
@@ -133,13 +147,11 @@ virt_p2v_CFLAGS = \
 	$(DBUS_CFLAGS)
 
 virt_p2v_LDADD = \
-	$(top_builddir)/common/utils/libutils.la \
-	$(top_builddir)/common/miniexpect/libminiexpect.la \
 	$(PCRE_LIBS) \
 	$(LIBXML2_LIBS) \
 	$(GTK_LIBS) \
 	$(DBUS_LIBS) \
-	../gnulib/lib/libgnu.la \
+	gnulib/lib/libgnu.a \
 	-lm
 
 $(generated_sources) virt-p2v-kernel-config.pod: $(srcdir)/generate-p2v-config.pl
@@ -157,7 +169,7 @@ dependencies_files = \
 	dependencies.redhat \
 	dependencies.suse
 
-$(dependencies_files): dependencies.m4 ../config.status
+$(dependencies_files): dependencies.m4 config.status
 	define=`echo $@ | $(SED) 's/dependencies.//;y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/'`; \
 	m4 -D$$define=1 -DGTK_VERSION=$(GTK_VERSION) $< > $@-t
 	mv $@-t $@
@@ -239,8 +251,12 @@ PHYSICAL_MACHINE = $(abs_builddir)/fedora.img
 BLANK_DISK = blank-part.img
 
 check_DATA = \
+	$(NULL)
+if HAVE_LIBGUESTFS
+check_DATA += \
 	$(PHYSICAL_MACHINE) \
 	$(BLANK_DISK)
+endif HAVE_LIBGUESTFS
 
 run-virt-p2v-directly: $(PHYSICAL_MACHINE)
 	$(top_builddir)/run virt-p2v --test-disk=$(PHYSICAL_MACHINE)
@@ -290,15 +306,15 @@ TESTS = \
 	test-virt-p2v-cmdline.sh \
 	test-virt-p2v-docs.sh
 
-APPLIANCE_TESTS = \
+LIBGUESTFS_TESTS = \
 	test-virt-p2v.sh \
 	test-virt-p2v-nbdkit.sh
 
-if ENABLE_APPLIANCE
+if HAVE_LIBGUESTFS
 TESTS += \
-	$(APPLIANCE_TESTS) \
+	$(LIBGUESTFS_TESTS) \
 	$(SLOW_TESTS)
-endif ENABLE_APPLIANCE
+endif HAVE_LIBGUESTFS
 
 check-valgrind:
 	make VG="@VG@" check
