@@ -405,7 +405,8 @@ distributed for any purpose without any restrictions.
 my $reporting_bugs =
 "=head1 BUGS
 
-To get a list of bugs against libguestfs, use this link:
+To get a list of bugs against libguestfs (which include virt-p2v),
+use this link:
 L<https://bugzilla.redhat.com/buglist.cgi?component=libguestfs&product=Virtualization+Tools>
 
 To report a new bug against libguestfs, use this link:
@@ -417,20 +418,15 @@ When reporting a bug, please supply:
 
 \=item *
 
-The version of libguestfs.
+The version of virt-p2v.
 
 \=item *
 
-Where you got libguestfs (eg. which Linux distro, compiled from source, etc)
+Where you got virt-p2v (eg. which Linux distro, compiled from source, etc)
 
 \=item *
 
 Describe the bug accurately and give a way to reproduce it.
-
-\=item *
-
-Run L<libguestfs-test-tool(1)> and paste the B<complete, unedited>
-output into the bug report.
 
 \=back
 ";
