@@ -24,6 +24,9 @@ if ENABLE_GNULIB_TESTS
 SUBDIRS += gnulib/tests
 endif
 
+# bash-completion
+SUBDIRS += bash
+
 EXTRA_DIST = \
 	$(BUILT_SOURCES) \
 	$(TESTS) $(LIBGUESTFS_TESTS) $(SLOW_TESTS) \

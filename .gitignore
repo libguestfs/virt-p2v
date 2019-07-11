@@ -12,6 +12,8 @@ Makefile.in
 /about-authors.c
 /aclocal.m4
 /autom4te.cache/
+/bash/virt-p2v-make-kickstart
+/bash/virt-p2v-make-kiwi
 /blank-part.img
 /build-aux/
 /config.c

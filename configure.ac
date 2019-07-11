@@ -78,6 +78,10 @@ dnl Any C libraries required by virt-p2v.
 HEADING([Checking for libraries used by virt-p2v])
 m4_include([m4/p2v-libraries.m4])
 
+dnl Bash completion.
+HEADING([Checking for bash completion])
+m4_include([m4/p2v-bash-completion.m4])
+
 dnl All the programs used for tests.
 HEADING([Checking for programs for tests])
 m4_include([m4/p2v-tests.m4])
@@ -100,6 +104,7 @@ AC_CONFIG_FILES([run],
                 [chmod +x,-w run])
 
 AC_CONFIG_FILES([Makefile
+                 bash/Makefile
                  gnulib/lib/Makefile
                  gnulib/tests/Makefile])
 
