@@ -244,7 +244,7 @@ $name = basename ($input, ".pod") unless defined $name;
 $section = 1 unless defined $section;
 
 # Is it a user command line tool?
-my $cli_tool = $section == 1 && $name !~ /^guestfs-/;
+my $cli_tool = $section == 1 && $name !~ /^p2v-/;
 
 # Warning parameter is mandatory for user tools in section 1.
 if ($strict_checks && $cli_tool) {
