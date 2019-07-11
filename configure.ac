@@ -105,6 +105,7 @@ AC_CONFIG_FILES([run],
 
 AC_CONFIG_FILES([Makefile
                  bash/Makefile
+                 docs/Makefile
                  gnulib/lib/Makefile
                  gnulib/tests/Makefile])
 

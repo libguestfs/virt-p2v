@@ -1,0 +1,47 @@
+=head1 NAME
+
+p2v-release-notes - virt-p2v Release Notes
+
+=begin comment
+
+UPDATED TO <commit id>
+
+=end comment
+
+=begin comment
+
+<script>
+document.body.style.backgroundImage = "url('draft.png')";
+document.body.style.backgroundRepeat = "no-repeat";
+</script>
+
+=end comment
+
+=head1 RELEASE NOTES FOR VIRT-P2V 1.XX
+
+These release notes only cover the differences from the previous
+stable/dev branch split (1.40.0).  For detailed changelogs, please see
+the git repository, or the ChangeLog file distributed in the tarball.
+
+...
+
+=for comment ################################################################
+
+=head1 RELEASE NOTES FOR HISTORICAL VERSIONS OF VIRT-P2V
+
+Before 1.XX virt-p2v was released as part of libguestfs.  Therefore,
+release notes for these older versions are found as part of the
+L<release notes of libguestfs|guestfs-release-notes(1)>.
+
+=head1 SEE ALSO
+
+L<guestfs-release-notes(1)>,
+L<http://libguestfs.org/>
+
+=head1 AUTHOR
+
+Richard W.M. Jones
+
+=head1 COPYRIGHT
+
+Copyright (C) 2009-2019 Red Hat Inc.

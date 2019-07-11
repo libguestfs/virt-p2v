@@ -109,7 +109,7 @@ usually F<virt-p2v.i686>) by some means, and that you install it next
 to the ordinary F<virt-p2v> binary (eg. in F<$libdir/virt-p2v/> or
 C<$VIRT_V2V_DATA_DIR>).  This is outside the scope of this manual
 page, but you can find some tips in
-L<guestfs-building(1)/BUILDING i686 32 BIT VIRT-P2V>.
+L<p2v-building(1)/BUILDING i686 32 BIT VIRT-P2V>.
 
 =head1 OPTIONS
 

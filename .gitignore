@@ -25,6 +25,12 @@ Makefile.in
 /dependencies.debian
 /dependencies.redhat
 /dependencies.suse
+/docs/p2v-building.1
+/docs/p2v-hacking.1
+/docs/p2v-release-notes.1
+/docs/stamp-p2v-building.pod
+/docs/stamp-p2v-hacking.pod
+/docs/stamp-p2v-release-notes.pod
 /fedora.img
 /gnulib/
 /kernel-config.c

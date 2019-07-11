@@ -24,6 +24,8 @@ if ENABLE_GNULIB_TESTS
 SUBDIRS += gnulib/tests
 endif
 
+SUBDIRS += docs
+
 # bash-completion
 SUBDIRS += bash
 
@@ -248,7 +250,7 @@ stamp-virt-p2v-make-kiwi.pod: virt-p2v-make-kiwi.pod
 	touch $@
 
 # Run virt-p2v locally either directly or in a VM.
-# See guestfs-hacking(1) section "Running virt-p2v"
+# See p2v-hacking(1) section "Running virt-p2v"
 
 PHYSICAL_MACHINE = $(abs_builddir)/fedora.img
 BLANK_DISK = blank-part.img

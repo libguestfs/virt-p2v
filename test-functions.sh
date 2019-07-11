@@ -110,7 +110,7 @@ skip_unless ()
     fi
 }
 
-# Slow tests should always call this function.  (See guestfs-hacking(1)).
+# Slow tests should always call this function.  (See p2v-hacking(1)).
 slow_test ()
 {
     if [ -z "$SLOW" ]; then
