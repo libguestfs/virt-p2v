@@ -1,0 +1,22 @@
+Virt-p2v is a GUI interface to convert a physical machine to run
+as virtual machine on KVM.  For more information see the home page:
+
+  http://libguestfs.org/
+
+For discussion, development, patches, etc. please use the mailing
+list:
+
+  http://www.redhat.com/mailman/listinfo/libguestfs
+
+To find out how to build libguestfs from source, read:
+
+  docs/p2v-building.pod
+  http://libguestfs.org/p2v-building.1.html
+  man docs/p2v-building.1
+
+Copyright (C) 2009-2019 Red Hat Inc.
+
+The library is distributed under the LGPLv2+.  The programs are
+distributed under the GPLv2+.  Please see the files COPYING and
+COPYING.LIB for full license information.  The examples are under a
+very liberal license.
