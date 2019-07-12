@@ -314,7 +314,7 @@ cache_ssh_identity (struct config *config)
  * thinks might grow to an unbounded size.  Since we control
  * extra_args, this is not in fact a problem.
  */
-#if defined(__GNUC__) && GUESTFS_GCC_VERSION >= 40800 /* gcc >= 4.8.0 */
+#if P2V_GCC_VERSION >= 40800 /* gcc >= 4.8.0 */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wstack-usage="
 #endif
@@ -575,7 +575,7 @@ start_ssh (unsigned spawn_flags, struct config *config,
   return h;
 }
 
-#if defined(__GNUC__) && GUESTFS_GCC_VERSION >= 40800 /* gcc >= 4.8.0 */
+#if P2V_GCC_VERSION >= 40800 /* gcc >= 4.8.0 */
 #pragma GCC diagnostic pop
 #endif
 

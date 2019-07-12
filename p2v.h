@@ -32,6 +32,13 @@
 
 #include "guestfs-utils.h"
 
+#if defined(__GNUC__) && !defined(__clang__)
+# define P2V_GCC_VERSION \
+    (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
+#else
+# define P2V_GCC_VERSION 0
+#endif
+
 /* All disks / removable media / network interfaces discovered
  * when the program started.  Do not change these.
  */
