@@ -768,7 +768,9 @@ static void add_input_driver (const char *name, size_t len);
 static void add_output_driver (const char *name, size_t len);
 static int compatible_version (const char *v2v_version);
 
+#if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic ignored "-Wsuggest-attribute=noreturn" /* WTF? */
+#endif
 int
 test_connection (struct config *config)
 {

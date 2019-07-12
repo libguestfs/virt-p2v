@@ -150,7 +150,9 @@ set_control_h (mexp_h *new_h)
   pthread_mutex_unlock (&cancel_requested_mutex);
 }
 
+#if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic ignored "-Wsuggest-attribute=noreturn"
+#endif
 int
 start_conversion (struct config *config,
                   void (*notify_ui) (int type, const char *data))
