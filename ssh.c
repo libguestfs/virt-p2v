@@ -773,7 +773,6 @@ int
 test_connection (struct config *config)
 {
   mexp_h *h;
-  CLEANUP_FREE char *major_str = NULL, *minor_str = NULL, *release_str = NULL;
   int feature_libguestfs_rewrite = 0;
   int status;
   const int ovecsize = 12;
