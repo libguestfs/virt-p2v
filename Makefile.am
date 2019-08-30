@@ -139,6 +139,7 @@ nodist_virt_p2v_SOURCES = \
 
 virt_p2v_CPPFLAGS = \
 	-DLOCALEBASEDIR=\""$(datadir)/locale"\" \
+	-DGTK_DISABLE_DEPRECATED \
 	-I$(srcdir)/libguestfs \
 	-I$(srcdir)/miniexpect \
 	-I$(srcdir)/gnulib/lib -Ignulib/lib
