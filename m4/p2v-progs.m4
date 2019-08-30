@@ -58,6 +58,14 @@ else
     AC_MSG_RESULT([yes])
 fi
 
+dnl Check for List::MoreUtils, used by generate-p2v-config.pl
+AC_MSG_CHECKING([for List::MoreUtils])
+if ! $PERL -MList::MoreUtils -e1 >&AS_MESSAGE_LOG_FD 2>&1; then
+    AC_MSG_ERROR([perl List::MoreUtils must be installed])
+else
+    AC_MSG_RESULT([yes])
+fi
+
 dnl Define the path to the podwrapper program.
 PODWRAPPER="\$(guestfs_am_v_podwrapper)$PERL $(pwd)/podwrapper.pl"
 AC_SUBST([PODWRAPPER])
