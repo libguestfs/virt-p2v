@@ -69,6 +69,8 @@ elif test "x$with_gtk" = "xcheck"; then
     ])
 fi
 
+AC_SUBST([GTK_VERSION])
+
 dnl D-Bus is an optional dependency of virt-p2v.
 PKG_CHECK_MODULES([DBUS], [dbus-1], [
     AC_SUBST([DBUS_CFLAGS])
