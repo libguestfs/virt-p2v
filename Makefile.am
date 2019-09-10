@@ -396,3 +396,14 @@ stamp-test-virt-p2v-pxe-userkey:
 	rm -f test-virt-p2v-pxe.id_rsa.pub
 	ssh-keygen -t rsa -f test-virt-p2v-pxe.id_rsa -N ''
 	touch $@
+
+# Commit everything in current directory to HEAD, and set commit
+# message to current version (only for maintainer).
+
+maintainer-commit:
+	git commit -a -m "Version $(VERSION)."
+
+# Tag HEAD with current version (only for maintainer).
+
+maintainer-tag:
+	git tag -a "v$(VERSION)" -m "Version $(VERSION)" -f
