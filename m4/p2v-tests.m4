@@ -25,11 +25,12 @@ AC_ARG_ENABLE([gnulib-tests],
 AM_CONDITIONAL([ENABLE_GNULIB_TESTS],[test "x$ENABLE_GNULIB_TESTS" = "xyes"])
 AC_MSG_RESULT([$ENABLE_GNULIB_TESTS])
 
-dnl Check libguestfs tools (needed for create the test images).
+dnl Check libguestfs tools.
 AC_CHECK_PROG([GUESTFISH],[guestfish],[guestfish],[no])
 AC_CHECK_PROG([VIRT_BUILDER],[virt-builder],[virt-builder],[no])
+AC_CHECK_PROG([VIRT_V2V],[virt-v2v],[virt-v2v],[no])
 AM_CONDITIONAL([HAVE_LIBGUESTFS],
-    [test "x$GUESTFISH" != "xno" && test "x$VIRT_BUILDER" != "xno"])
+    [test "x$GUESTFISH" != "xno" && test "x$VIRT_BUILDER" != "xno" && test "x$VIRT_V2V" != "xno"])
 
 dnl Check for valgrind
 AC_CHECK_PROG([VALGRIND],[valgrind],[valgrind],[no])
