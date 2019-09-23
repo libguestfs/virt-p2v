@@ -4,7 +4,7 @@ p2v-release-notes - virt-p2v Release Notes
 
 =begin comment
 
-UPDATED TO <commit id>
+UPDATED TO 9b009aa4a3898648fe68301d1c5ed774a0bf2e38
 
 =end comment
 
@@ -17,19 +17,39 @@ document.body.style.backgroundRepeat = "no-repeat";
 
 =end comment
 
-=head1 RELEASE NOTES FOR VIRT-P2V 1.XX
+=head1 RELEASE NOTES FOR VIRT-P2V 1.42.0
 
 These release notes only cover the differences from the previous
-stable/dev branch split (1.40.0).  For detailed changelogs, please see
-the git repository, or the ChangeLog file distributed in the tarball.
+version.  For detailed changelogs, please see the git repository.
 
-...
+=over 4
+
+=item
+
+The C<rhv-upload> output mode of virt-v2v is not listed as output
+driver, as virt-p2v does not provide all the GUI elements to properly
+use it (Pino Toscano).
+
+=item
+
+Virt-v2v is checked as requirement for the functional tests, in
+addition to guestfish, and virt-customize (Pino Toscano).
+
+=back
 
 =for comment ################################################################
 
+=head1 RELEASE NOTES FOR VIRT-P2V 1.41.0
+
+This is the first standalone release of virt-p2v, split from the
+libguestfs sources.
+
+There are no functionality changes compared to virt-p2v shipped as
+part of libguestfs 1.40.
+
 =head1 RELEASE NOTES FOR HISTORICAL VERSIONS OF VIRT-P2V
 
-Before 1.XX virt-p2v was released as part of libguestfs.  Therefore,
+Before 1.41.0 virt-p2v was released as part of libguestfs.  Therefore,
 release notes for these older versions are found as part of the
 L<release notes of libguestfs|guestfs-release-notes(1)>.
 
