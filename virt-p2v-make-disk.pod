@@ -21,6 +21,8 @@ The required I<-o> parameter specifies where the output should go, for
 example to a USB key (eg. C<-o /dev/sdX>) or to a file.  If you pass a
 device name, then B<the existing contents of the device will be erased>.
 
+The root user on the disk image uses C<p2v> as its initial password.
+
 =head2 C<os-version> parameter
 
 The optional C<os-version> parameter is the base Linux distro to use

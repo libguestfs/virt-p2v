@@ -23,6 +23,8 @@ build a bootable P2V ISO, live CD, USB key, or PXE image.  This tool
 only builds the kickstart file, but this manual page describes some of
 the ways you can use the kickstart file.
 
+The root user on the disk image uses C<p2v> as its initial password.
+
 =head1 BUILDING THE KICKSTART FILE
 
 Using virt-p2v-make-kickstart is very simple:

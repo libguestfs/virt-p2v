@@ -22,6 +22,8 @@ kiwi to build a bootable P2V live CD ISO, USB key, or PXE image.  This tool
 only builds the kiwi configuration, but this manual page describes some of
 the ways you can use the kiwi configuration.
 
+The root user on the disk image uses C<p2v> as its initial password.
+
 =head1 BUILDING THE KIWI CONFIGURATION
 
 Using virt-p2v-make-kiwi is very simple:
