@@ -233,11 +233,16 @@ fi
 
 # Run virt-builder.  Note we controversially assume systemd here.  We
 # could provide a sysvinit fallback if required.
+# The manual 'hostname' invocation is needed to set the hostname
+# also for the appliance itself, so scriptlets can properly use
+# the hostname we want.
 virt-builder "$osversion"                                       \
     $verbose_option						\
     --output "$output"                                          \
     $arch_option						\
     $preinstall_args                                            \
+    --hostname p2v.local                                        \
+    --run-command 'hostname p2v.local'                          \
     --update                                                    \
     --install "$install"                                        \
     --root-password password:p2v                                \
