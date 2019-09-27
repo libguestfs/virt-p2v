@@ -266,8 +266,9 @@ endif HAVE_LIBGUESTFS
 run-virt-p2v-directly: $(PHYSICAL_MACHINE)
 	$(top_builddir)/run virt-p2v --test-disk=$(PHYSICAL_MACHINE)
 
+if HAVE_LIBGUESTFS
 run-virt-p2v-in-a-vm: virt-p2v.img $(PHYSICAL_MACHINE)
-	$(QEMU) \
+	$(shell guestfish get-hv) \
 	  -M pc,accel=kvm:tcg \
 	  -cpu host \
 	  -m 1024 \
@@ -284,6 +285,7 @@ run-virt-p2v-in-a-vm: virt-p2v.img $(PHYSICAL_MACHINE)
 	  -device e1000,netdev=net2 \
 	  $(QEMU_OPTIONS) \
 	  &
+endif HAVE_LIBGUESTFS
 
 run-virt-p2v-non-gui-conversion: stamp-test-virt-p2v-pxe-data-files
 	SLOW=1 $(top_builddir)/run ./test-virt-p2v-pxe.sh
