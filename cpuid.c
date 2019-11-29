@@ -39,7 +39,6 @@
 #include <error.h>
 #include <libintl.h>
 
-#include "c-ctype.h"
 #include "getprogname.h"
 #include "ignore-value.h"
 
@@ -97,7 +96,7 @@ get_lscpu (void)
     *p = '\0';
     key = strdup (line);
     /* Skip leading whitespace in the value. */
-    for (++p; *p && c_isspace (*p); ++p)
+    for (++p; *p && g_ascii_isspace (*p); ++p)
       ;
     value = strdup (p);
 
