@@ -18,6 +18,8 @@
 #ifndef P2V_H
 #define P2V_H
 
+#include <glib.h>
+
 #include <stdio.h>
 #include <stdbool.h>
 

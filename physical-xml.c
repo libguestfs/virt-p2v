@@ -34,8 +34,6 @@
 
 #include <libxml/xmlwriter.h>
 
-#include <glib.h>
-
 #include "getprogname.h"
 
 #include "libxml2-writer-macros.h"
