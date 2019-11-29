@@ -98,9 +98,7 @@ gnulib_tool=$GNULIB_SRCDIR/gnulib-tool
 <$gnulib_tool || exit
 
 modules='
-c-ctype
 error
-getprogname
 ignore-value
 manywarnings
 ptsname_r
