@@ -50,7 +50,6 @@
 #include <pthread.h>
 
 #include "ignore-value.h"
-#include "getprogname.h"
 
 #include "miniexpect.h"
 #include "p2v.h"
@@ -269,7 +268,7 @@ start_conversion (struct config *config,
 #if DEBUG_STDERR
     fprintf (stderr,
              "%s: data connection for %s: SSH remote port %d, local port %s:%d\n",
-             getprogname (), device,
+             g_get_prgname (), device,
              data_conns[i].nbd_remote_port,
              nbd_local_ipaddr, nbd_local_port);
 #endif
@@ -665,6 +664,6 @@ generate_p2v_version_file (const char *p2v_version_file)
     return;                     /* non-fatal */
   }
   fprintf (fp, "%s %s\n",
-           getprogname (), PACKAGE_VERSION_FULL);
+           g_get_prgname (), PACKAGE_VERSION_FULL);
   fclose (fp);
 }

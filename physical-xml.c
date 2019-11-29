@@ -34,8 +34,6 @@
 
 #include <libxml/xmlwriter.h>
 
-#include "getprogname.h"
-
 #include "libxml2-writer-macros.h"
 
 #include "p2v.h"
@@ -77,7 +75,7 @@ generate_physical_xml (struct config *config, struct data_conn *data_conns,
 
   memkb = config->memory / 1024;
 
-  comment (" %s %s ", getprogname (), PACKAGE_VERSION_FULL);
+  comment (" %s %s ", g_get_prgname (), PACKAGE_VERSION_FULL);
 
   comment
     (" NOTE!\n"

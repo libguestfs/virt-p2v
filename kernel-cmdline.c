@@ -28,8 +28,6 @@
 #include <errno.h>
 #include <error.h>
 
-#include "getprogname.h"
-
 #include "p2v.h"
 
 static void
@@ -142,7 +140,7 @@ parse_cmdline_string (const char *cmdline)
     break;
   case VALUE_QUOTED:            /* unterminated key="value" */
     fprintf (stderr, "%s: warning: unterminated quoted string on kernel command line\n",
-             getprogname ());
+             g_get_prgname ());
     add_string (&ret, &len, value, p-value);
   }
 

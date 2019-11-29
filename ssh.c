@@ -54,7 +54,6 @@
 #include <signal.h>
 
 #include "ignore-value.h"
-#include "getprogname.h"
 
 #include "miniexpect.h"
 #include "p2v.h"
@@ -143,7 +142,7 @@ compile_regexps (void)
     pcre_fullinfo ((re), NULL, PCRE_INFO_OKPARTIAL, &p);		\
     if (p != 1) {							\
       fprintf (stderr, "%s: %s:%d: internal error: pattern '%s' cannot be used for partial matching\n", \
-	       getprogname (),				\
+	       g_get_prgname (),				\
 	       __FILE__, __LINE__, (pattern));				\
       abort ();								\
     }									\
@@ -813,7 +812,7 @@ test_connection (struct config *config)
       v2v_version = strndup (&h->buffer[ovector[2]], ovector[3]-ovector[2]);
 #if DEBUG_STDERR
       fprintf (stderr, "%s: remote virt-v2v version: %s\n",
-               getprogname (), v2v_version);
+               g_get_prgname (), v2v_version);
 #endif
       break;
 
@@ -895,7 +894,7 @@ test_connection (struct config *config)
     case 101:                   /* virt-v2v supports --colours option */
 #if DEBUG_STDERR
   fprintf (stderr, "%s: remote virt-v2v supports --colours option\n",
-           getprogname ());
+           g_get_prgname ());
 #endif
       feature_colours_option = 1;
       break;
@@ -1009,7 +1008,7 @@ add_option (const char *type, char ***drivers, const char *name, size_t len)
 
 #if DEBUG_STDERR
   fprintf (stderr, "%s: remote virt-v2v supports %s driver %s\n",
-           getprogname (), type, (*drivers)[n-1]);
+           g_get_prgname (), type, (*drivers)[n-1]);
 #endif
 }
 

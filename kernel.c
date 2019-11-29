@@ -34,8 +34,6 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-#include "getprogname.h"
-
 #include "p2v.h"
 
 static void notify_ui_callback (int type, const char *data);
@@ -77,7 +75,7 @@ kernel_conversion (struct config *config, char **cmdline, int cmdline_source)
     const char *err = get_conversion_error ();
 
     fprintf (stderr, "%s: error during conversion: %s\n",
-             getprogname (), err);
+             g_get_prgname (), err);
 
     p = get_cmdline_key (cmdline, "p2v.fail");
     if (p)
@@ -106,7 +104,7 @@ notify_ui_callback (int type, const char *data)
   switch (type) {
   case NOTIFY_LOG_DIR:
     ansi_magenta (stdout);
-    printf ("%s: remote log directory location: ", getprogname ());
+    printf ("%s: remote log directory location: ", g_get_prgname ());
     ansi_red (stdout);
     fputs (data, stdout);
     ansi_restore (stdout);
@@ -119,7 +117,7 @@ notify_ui_callback (int type, const char *data)
 
   case NOTIFY_STATUS:
     ansi_magenta (stdout);
-    printf ("%s: %s", getprogname (), data);
+    printf ("%s: %s", g_get_prgname (), data);
     ansi_restore (stdout);
     putchar ('\n');
     break;
@@ -127,7 +125,7 @@ notify_ui_callback (int type, const char *data)
   default:
     ansi_red (stdout);
     printf ("%s: unknown message during conversion: type=%d data=%s",
-            getprogname (), type, data);
+            g_get_prgname (), type, data);
     ansi_restore (stdout);
     putchar ('\n');
   }

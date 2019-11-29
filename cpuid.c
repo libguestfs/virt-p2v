@@ -39,7 +39,6 @@
 #include <error.h>
 #include <libintl.h>
 
-#include "getprogname.h"
 #include "ignore-value.h"
 
 #include "p2v.h"

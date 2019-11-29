@@ -38,7 +38,6 @@
 #include <linux/rtc.h>
 #endif
 
-#include "getprogname.h"
 #include "ignore-value.h"
 
 #include "p2v.h"
@@ -48,7 +47,7 @@ void
 get_rtc_config (struct rtc_config *rtc)
 {
   fprintf (stderr, "%s: RTC: compiled without support for /dev/rtc\n",
-           getprogname ());
+           g_get_prgname ());
 
   rtc->offset = 0;
   rtc->basis = BASIS_UTC;
@@ -92,7 +91,7 @@ get_rtc_config (struct rtc_config *rtc)
 
 #ifdef DEBUG_STDERR
   fprintf (stderr, "%s: RTC: %04d-%02d-%02d %02d:%02d:%02d\n",
-           getprogname (),
+           g_get_prgname (),
            rtm.tm_year + 1900, rtm.tm_mon + 1, rtm.tm_mday,
            rtm.tm_hour, rtm.tm_min, rtm.tm_sec);
 #endif
@@ -117,7 +116,7 @@ get_rtc_config (struct rtc_config *rtc)
 
 #ifdef DEBUG_STDERR
   fprintf (stderr, "%s: RTC: %ld system time: %ld difference: %g\n",
-           getprogname (),
+           g_get_prgname (),
            (long) rtc_time, (long) system_time, rf);
 #endif
 
@@ -129,7 +128,7 @@ get_rtc_config (struct rtc_config *rtc)
   if (rf < -12*60*60 || rf > 14*60*60) {
     fprintf (stderr,
              "%s: RTC: offset of RTC from UTC is out of range (%g).\n",
-             getprogname (), rf);
+             g_get_prgname (), rf);
     return;
   }
 
@@ -137,7 +136,7 @@ get_rtc_config (struct rtc_config *rtc)
 
 #ifdef DEBUG_STDERR
   fprintf (stderr, "%s: RTC: offset of RTC from UTC = %d secs\n",
-           getprogname (), rtc->offset);
+           g_get_prgname (), rtc->offset);
 #endif
 
   /* Is the hardware clock set to localtime?
@@ -154,7 +153,7 @@ get_rtc_config (struct rtc_config *rtc)
     rtc->basis = BASIS_LOCALTIME;
     rtc->offset = 0;
 #ifdef DEBUG_STDERR
-    fprintf (stderr, "%s: RTC time is localtime\n", getprogname ());
+    fprintf (stderr, "%s: RTC time is localtime\n", g_get_prgname ());
 #endif
   }
 

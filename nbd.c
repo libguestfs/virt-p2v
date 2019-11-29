@@ -37,8 +37,6 @@
 #include <sys/socket.h>
 #include <assert.h>
 
-#include "getprogname.h"
-
 #include "p2v.h"
 
 /* How long to wait for the NBD server to start (seconds). */
@@ -267,7 +265,7 @@ test_nbd_servers (void)
     fprintf (stderr,
              _("%s: no working NBD server was found, cannot continue.\n"
                "Please check the --nbd option in the virt-p2v(1) man page.\n"),
-             getprogname ());
+             g_get_prgname ());
     exit (EXIT_FAILURE);
   }
 
@@ -582,7 +580,7 @@ bind_tcpip_socket (const char *ipaddr, const char *port,
   if (err != 0) {
 #if DEBUG_STDERR
     fprintf (stderr, "%s: getaddrinfo: %s: %s: %s",
-             getprogname (), ipaddr ? ipaddr : "<any>", port,
+             g_get_prgname (), ipaddr ? ipaddr : "<any>", port,
              gai_strerror (err));
 #endif
     return -1;
@@ -637,7 +635,7 @@ bind_tcpip_socket (const char *ipaddr, const char *port,
   if (nr_fds == 0 && addr_in_use) {
 #if DEBUG_STDERR
     fprintf (stderr, "%s: unable to bind to %s:%s: %s\n",
-             getprogname (), ipaddr ? ipaddr : "<any>", port,
+             g_get_prgname (), ipaddr ? ipaddr : "<any>", port,
              strerror (EADDRINUSE));
 #endif
     return -1;
@@ -645,7 +643,7 @@ bind_tcpip_socket (const char *ipaddr, const char *port,
 
 #if DEBUG_STDERR
   fprintf (stderr, "%s: bound to IP address %s:%s (%zu socket(s))\n",
-           getprogname (), ipaddr ? ipaddr : "<any>", port, nr_fds);
+           g_get_prgname (), ipaddr ? ipaddr : "<any>", port, nr_fds);
 #endif
 
   *fds_rtn = fds;
