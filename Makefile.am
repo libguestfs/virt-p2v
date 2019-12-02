@@ -124,8 +124,7 @@ virt_p2v_SOURCES = \
 	physical-xml.c \
 	rtc.c \
 	ssh.c \
-	utils.c \
-	whole-file.c
+	utils.c
 
 generated_sources = \
 	config.c \

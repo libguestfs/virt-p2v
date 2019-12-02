@@ -125,9 +125,6 @@ extern char *get_if_addr (const char *if_name);
 extern char *get_if_vendor (const char *if_name, int truncate);
 extern void wait_network_online (const struct config *);
 
-/* whole-file.c */
-extern int read_whole_file (const char *filename, char **data_r, size_t *size_r);
-
 /* virt-v2v version and features (read from remote). */
 extern char *v2v_version;
 
