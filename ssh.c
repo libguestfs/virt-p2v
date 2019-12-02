@@ -210,17 +210,15 @@ static int
 curl_download (const char *url, const char *local_file)
 {
   char curl_config_file[] = "/tmp/curl.XXXXXX";
-  char error_file[] = "/tmp/curlerr.XXXXXX";
-  CLEANUP_FREE char *error_message = NULL;
-  int fd, r;
+  int fd;
   size_t i, len;
   FILE *fp;
-  CLEANUP_FREE char *curl_cmd = NULL;
-
-  fd = mkstemp (error_file);
-  if (fd == -1)
-    error (EXIT_FAILURE, errno, "mkstemp: %s", error_file);
-  close (fd);
+  gboolean ret;
+  const char *argv[] = { "curl", "-f", "-s", "-S", "-o", local_file,
+                         "-K", curl_config_file, NULL };
+  CLEANUP_FREE char *stderr = NULL;
+  gint exit_status;
+  GError *gerror = NULL;
 
   /* Use a secure curl config file because escaping is easier. */
   fd = mkstemp (curl_config_file);
@@ -246,31 +244,29 @@ curl_download (const char *url, const char *local_file)
   fclose (fp);
 
   /* Run curl to download the URL to a file. */
-  if (asprintf (&curl_cmd, "curl -f -s -S -o %s -K %s 2>%s",
-                local_file, curl_config_file, error_file) == -1)
-    error (EXIT_FAILURE, errno, "asprintf");
-
-  r = system (curl_cmd);
+  ret = g_spawn_sync (NULL, /* working directory; inherit */
+                      (gchar **) argv,
+                      NULL, /* environment; inherit */
+                      G_SPAWN_SEARCH_PATH | G_SPAWN_STDOUT_TO_DEV_NULL,
+                      NULL, NULL, /* no child setup */
+                      NULL, &stderr, &exit_status, &gerror);
   /* unlink (curl_config_file); - useful for debugging */
-  if (r == -1)
-    error (EXIT_FAILURE, errno, "system: %s", curl_cmd);
+  if (!ret) {
+    set_ssh_error ("g_spawn_sync: %s: %s", url, gerror->message);
+    g_error_free (gerror);
+    return -1;
+  }
 
   /* Did curl subprocess fail? */
-  if (WIFEXITED (r) && WEXITSTATUS (r) != 0) {
-    if (read_whole_file (error_file, &error_message, NULL) == 0)
-      set_ssh_error ("%s: %s", url, error_message);
-    else
-      set_ssh_error ("%s: curl error %d", url, WEXITSTATUS (r));
-    unlink (error_file);
+  if (WIFEXITED (exit_status) && WEXITSTATUS (exit_status) != 0) {
+    set_ssh_error ("%s: %s", url, stderr);
     return -1;
   }
-  else if (!WIFEXITED (r)) {
-    set_ssh_internal_error ("curl subprocess got a signal (%d)", r);
-    unlink (error_file);
+  else if (!WIFEXITED (exit_status)) {
+    set_ssh_internal_error ("curl subprocess got a signal (%d)", exit_status);
     return -1;
   }
 
-  unlink (error_file);
   return 0;
 }
 
