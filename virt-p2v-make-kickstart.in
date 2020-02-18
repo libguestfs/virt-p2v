@@ -178,6 +178,16 @@ repo --name=rhel7_${minor}_server --baseurl=$baseurl/Server/$arch/os $proxy
 repo --name=rhel7_${minor}_server_optional --baseurl=$baseurl/Server-optional/$arch/os $proxy
 "
             ;;
+        rhel-8.*)
+            minor=$( echo "$repo" | sed 's/rhel-[0-9]*\.\([0-9]*\)/\1/' )
+            baseurl=http://download.devel.redhat.com/released/RHEL-8/8.$minor.0
+            # '$basearch' cannot be used in kickstart, so:
+            arch=`uname -m`
+            repos="$repos
+repo --name=rhel8_${minor}_0_baseos --baseurl=$baseurl/BaseOS/$arch/os $proxy
+repo --name=rhel8_${minor}_0_appstream --baseurl=$baseurl/AppStream/$arch/os $proxy
+"
+            ;;
         *)
             # A custom repo is just a URL.
             ((i++)) ||:
