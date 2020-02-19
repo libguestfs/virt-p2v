@@ -48,6 +48,7 @@ output=p2v.ks
 proxy=
 ssh_identity=
 verbose=
+packages_options=
 
 while true; do
     case "$1" in
@@ -187,6 +188,8 @@ repo --name=rhel7_${minor}_server_optional --baseurl=$baseurl/Server-optional/$a
 repo --name=rhel8_${minor}_0_baseos --baseurl=$baseurl/BaseOS/$arch/os $proxy
 repo --name=rhel8_${minor}_0_appstream --baseurl=$baseurl/AppStream/$arch/os $proxy
 "
+            # Avoid recommends by default.
+            packages_options="--excludeWeakdeps"
             ;;
         *)
             # A custom repo is just a URL.
@@ -229,6 +232,7 @@ done < $depsfile
   -v "extra_packages=$extra_packages" \
   -v "md5sum_virt_p2v=$md5sum_virt_p2v" \
   -v "repos=$repos" \
+  -v "packages_options=$packages_options" \
   '{
     gsub (/__PACKAGE_NAME__/, "@PACKAGE_NAME@");
     gsub (/__PACKAGE_VERSION__/, "@PACKAGE_VERSION@");
@@ -242,6 +246,7 @@ done < $depsfile
     gsub (/__EXTRA_PACKAGES__/, gensub (/,/, "\n", "g", extra_packages));
     gsub (/__MD5SUM_VIRT_P2V__/, md5sum_virt_p2v);
     gsub (/__REPOS__/, repos);
+    gsub (/__PACKAGES_OPTIONS__/, packages_options);
     print;
   }' \
   $datadir/p2v.ks.in > $output-t

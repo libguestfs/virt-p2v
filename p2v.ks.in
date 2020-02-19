@@ -43,7 +43,7 @@ __REPOS__
 # Packages to install in the ISO.  For dependencies, see
 # p2v/Makefile.am.  Note that libguestfs is NOT required by virt-p2v.
 
-%packages
+%packages __PACKAGES_OPTIONS__
 
 @core
 
