@@ -1018,10 +1018,11 @@ static void
 add_output_driver (const char *name, size_t len)
 {
   /* Ignore the 'vdsm' driver, since that should only be used by VDSM.
-   * Ignore the 'rhv-upload' driver, since we do not support passing all the
-   * options for it.
+   * Ignore the 'openstack' and 'rhv-upload' drivers, since we do not
+   * support passing all the options for them.
    */
   if ((len != 4 || memcmp (name, "vdsm", 4) != 0) &&
+      (len != 9 || memcmp (name, "openstack", 9) != 0) &&
       (len != 10 || memcmp (name, "rhv-upload", 10) != 0))
     add_option ("output", &output_drivers, name, len);
 }
