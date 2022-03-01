@@ -40,3 +40,12 @@
    ...
    fun:g_type_class_ref
 }
+
+# These appeared in glibc 2.35.
+# See also nbdkit commit f6409b4137c1aeb97d01eef5753f22033d64bfd4
+{
+   glibc_leak_4
+   Memcheck:Leak
+   ...
+   fun:dlopen@@*
+}
