@@ -720,10 +720,10 @@ virt-v2v command.  The virt-v2v command references the F<physical.xml>
 file (see above), which in turn references the NBD listening port(s)
 of the data connection(s).
 
-Output from the virt-v2v command (messages, debugging etc) is saved
-both in the log file on the conversion server.  Only informational
-messages are sent back over the control connection to be displayed in
-the graphical UI.
+Output from the virt-v2v command (messages, debugging etc) is saved in
+the log file on the conversion server.  Only informational messages are
+sent back over the control connection to be displayed in the graphical
+UI.
 
 =head1 SEE ALSO
 
