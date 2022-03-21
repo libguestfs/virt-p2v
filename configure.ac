@@ -40,6 +40,9 @@ AM_SILENT_RULES([yes]) # make --enable-silent-rules the default.
 
 AC_CONFIG_MACRO_DIR([m4])
 
+dnl Initialize libtool.
+LT_INIT
+
 dnl Extra string, a freeform string defined by packagers.
 AC_ARG_WITH([extra],
     [AS_HELP_STRING([--with-extra],
@@ -58,11 +61,6 @@ AC_DEFINE_UNQUOTED([PACKAGE_VERSION_EXTRA],["$p2v_extra"],[Extra version string.
 PACKAGE_VERSION_FULL="p2v_major.p2v_minor.p2v_release${p2v_extra}"
 AC_DEFINE_UNQUOTED([PACKAGE_VERSION_FULL],["$PACKAGE_VERSION_FULL"],[Full version string.])
 AC_SUBST([PACKAGE_VERSION_FULL])
-
-dnl Early gnulib initialization.
-HEADING([Configuring Gnulib])
-gl_EARLY
-gl_INIT
 
 dnl Check for external programs required to either build or run
 dnl virt-p2v.
@@ -105,10 +103,12 @@ AC_CONFIG_FILES([run],
 AC_CONFIG_FILES([Makefile
                  bash/Makefile
                  docs/Makefile
-                 gnulib/lib/Makefile
-                 gnulib/tests/Makefile])
+                 gnulib/lib/Makefile])
 
 AC_CONFIG_COMMANDS([p2v-config.h],
                    [${ac_srcdir}/generate-p2v-config.pl --file=p2v-config.h --output=p2v-config.h])
+
+dnl gnulib embedding hacks
+AC_TYPE_LONG_LONG_INT
 
 AC_OUTPUT

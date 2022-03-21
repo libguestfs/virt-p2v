@@ -14,16 +14,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-dnl Should we run the gnulib tests?
-AC_MSG_CHECKING([if we should run the GNUlib tests])
-AC_ARG_ENABLE([gnulib-tests],
-    [AS_HELP_STRING([--disable-gnulib-tests],
-        [disable running GNU Portability library tests @<:@default=yes@:>@])],
-        [ENABLE_GNULIB_TESTS="$enableval"],
-        [ENABLE_GNULIB_TESTS=yes])
-AM_CONDITIONAL([ENABLE_GNULIB_TESTS],[test "x$ENABLE_GNULIB_TESTS" = "xyes"])
-AC_MSG_RESULT([$ENABLE_GNULIB_TESTS])
-
 dnl Check libguestfs tools.
 AC_CHECK_PROG([GUESTFISH],[guestfish],[guestfish],[no])
 AC_CHECK_PROG([VIRT_BUILDER],[virt-builder],[virt-builder],[no])

@@ -19,10 +19,6 @@ include $(top_srcdir)/subdir-rules.mk
 ACLOCAL_AMFLAGS = -I m4
 
 SUBDIRS = gnulib/lib
-if ENABLE_GNULIB_TESTS
-SUBDIRS += gnulib/tests
-endif
-
 SUBDIRS += docs
 
 # bash-completion
@@ -32,8 +28,6 @@ EXTRA_DIST = \
 	$(BUILT_SOURCES) \
 	$(TESTS) $(LIBGUESTFS_TESTS) $(SLOW_TESTS) \
 	AUTHORS \
-	autogen.sh \
-	bootstrap \
 	contrib/aux-scripts/do-build.sh \
 	contrib/build-p2v-iso.sh \
 	contrib/patches/0001-RHEL-5-ONLY-DISABLE-AUTOMATIC-REMOTE-PORT-ALLOCATION.patch \
@@ -155,7 +149,7 @@ virt_p2v_LDADD = \
 	$(LIBXML2_LIBS) \
 	$(GTK_LIBS) \
 	$(DBUS_LIBS) \
-	gnulib/lib/libgnu.a \
+	gnulib/lib/libgnu.la \
 	-lm
 
 $(generated_sources) virt-p2v-kernel-config.pod: $(srcdir)/generate-p2v-config.pl

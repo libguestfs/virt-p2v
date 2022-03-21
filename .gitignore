@@ -1,4 +1,6 @@
 *~
+*.la
+*.lo
 *.log
 *.o
 *.trs
@@ -8,7 +10,6 @@
 Makefile
 Makefile.in
 
-/.git-module-status
 /about-authors.c
 /aclocal.m4
 /autom4te.cache/
@@ -32,10 +33,13 @@ Makefile.in
 /docs/stamp-p2v-hacking.pod
 /docs/stamp-p2v-release-notes.pod
 /fedora.img
-/gnulib/
 /kernel-config.c
-/m4/.gitignore
-/m4/gnulib-cache.m4
+/libtool
+/m4/libtool.m4
+/m4/lt~obsolete.m4
+/m4/ltoptions.m4
+/m4/ltsugar.m4
+/m4/ltversion.m4
 /p2v-config.h
 /podwrapper.pl
 /run

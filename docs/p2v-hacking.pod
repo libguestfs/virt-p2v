@@ -52,11 +52,6 @@ Outside contributions, experimental parts.
 
 Miscellaneous manual pages.
 
-=item F<gnulib>
-
-Gnulib is used as a portability library.  A copy of gnulib is included
-under here.
-
 =item F<libguestfs>
 
 Some sources (mostly with utilities) copied from libguestfs.  Changes

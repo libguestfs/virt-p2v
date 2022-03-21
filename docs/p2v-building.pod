@@ -119,7 +119,8 @@ and C<automake> when building from git.
 
  git clone https://github.com/libguestfs/virt-p2v
  cd virt-p2v
- ./autogen.sh
+ autoreconf -i
+ ./configure
  make
 
 =head1 BUILDING FROM TARBALLS
@@ -183,11 +184,6 @@ to list them all.  This section covers some of the more important
 ones.
 
 =over 4
-
-=item B<--disable-gnulib-tests>
-
-On some platforms the GNUlib test suite can be flaky.  This disables
-it, since errors in the GNUlib test suite are often not important.
 
 =item B<--enable-werror>
 
