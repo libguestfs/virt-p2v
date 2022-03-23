@@ -243,7 +243,7 @@ virt-builder "$osversion"                                       \
     $preinstall_args                                            \
     --hostname p2v.local                                        \
     --run-command 'hostname p2v.local'                          \
-    --update                                                    \
+    --run-command 'dnf -y update --exclude=kernel\*'            \
     --install "$install"                                        \
     --root-password password:p2v                                \
     --upload "$datadir"/issue:/etc/issue                        \
