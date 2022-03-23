@@ -264,7 +264,7 @@ run-virt-p2v-in-a-vm: virt-p2v.img $(PHYSICAL_MACHINE)
 	$(shell guestfish get-hv) \
 	  -M pc,accel=kvm:tcg \
 	  -cpu host \
-	  -m 1024 \
+	  -m 2048 \
 	  -drive id=hd0,file=$(PHYSICAL_MACHINE),format=raw,if=ide \
 	  -device piix3-usb-uhci \
 	  -drive id=usb0,file=$<,format=raw,snapshot=on,if=none \
