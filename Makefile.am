@@ -278,6 +278,38 @@ run-virt-p2v-in-a-vm: virt-p2v.img $(PHYSICAL_MACHINE)
 	  -device e1000,netdev=net2 \
 	  $(QEMU_OPTIONS) \
 	  &
+
+run-virt-p2v-in-an-nvme-vm: virt-p2v.img $(PHYSICAL_MACHINE) $(BLANK_DISK)
+	$(shell guestfish get-hv) \
+	  -M pc,accel=kvm:tcg \
+	  -cpu host \
+	  -m 2048 \
+	  -boot menu=on \
+	  \
+	  -drive id=phys,if=none,format=raw,file=$(PHYSICAL_MACHINE),snapshot=on \
+	  -device nvme,drive=phys,serial=01234567 \
+	  \
+	  -drive id=usb0,if=none,format=raw,file=$<,snapshot=on \
+	  -device piix3-usb-uhci,id=usb-bus \
+	  -device usb-storage,drive=usb0,bootindex=1,bus=usb-bus.0 \
+	  \
+	  -drive id=blank1,if=none,format=raw,file=$(BLANK_DISK),snapshot=on \
+	  -drive id=blank2,if=none,format=raw,file=$(BLANK_DISK),snapshot=on \
+	  -device nvme,id=nvme-ctrl,serial=89abcdef \
+	  -device nvme-ns,drive=blank1,bus=nvme-ctrl \
+	  -device nvme-ns,drive=blank2,bus=nvme-ctrl \
+	  \
+	  -netdev user,id=net0,net=169.254.0.0/16 \
+	  -device virtio-net-pci,netdev=net0 \
+	  \
+	  -netdev user,id=net1 \
+	  -device rtl8139,netdev=net1 \
+	  \
+	  -netdev user,id=net2 \
+	  -device e1000,netdev=net2 \
+	  \
+	  $(QEMU_OPTIONS) \
+	  &
 endif HAVE_LIBGUESTFS
 
 run-virt-p2v-non-gui-conversion: stamp-test-virt-p2v-pxe-data-files
