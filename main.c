@@ -479,6 +479,7 @@ find_all_disks (void)
 
     if (STRPREFIX (d->d_name, "cciss!") ||
         STRPREFIX (d->d_name, "hd") ||
+        STRPREFIX (d->d_name, "nvme") ||
         STRPREFIX (d->d_name, "sd") ||
         STRPREFIX (d->d_name, "ubd") ||
         STRPREFIX (d->d_name, "vd")) {
