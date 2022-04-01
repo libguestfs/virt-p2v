@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-# Test virt-p2v in non-GUI mode using nbdkit instead of qemu-nbd.
+# Test virt-p2v in non-GUI mode using nbdkit.
 
 set -e
 
@@ -47,7 +47,7 @@ export PATH=$d:$PATH
 # The Linux kernel command line.
 cmdline="p2v.server=localhost p2v.name=fedora p2v.disks=$f1,$f2 p2v.o=local p2v.os=$(pwd)/$d p2v.network=em1:wired,other p2v.post="
 
-# Only use nbdkit, disable qemu-nbd.
+# Only use nbdkit.
 $VG virt-p2v --cmdline="$cmdline" --nbd=nbdkit,nbdkit-no-sa
 
 # Test the libvirt XML metadata and a disk was created.

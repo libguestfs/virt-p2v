@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-# This is an scp substitute used by test-virt-p2v.sh.
+# This is an scp substitute used by test-virt-p2v-nbdkit.sh.
 
 TEMP=`getopt \
         -o 'o:P:' \

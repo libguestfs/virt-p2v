@@ -73,15 +73,12 @@ I<Required>.
 
 I<Required>.
 
-=item qemu-nbd
-
 =item nbdkit
 
-Optional.  qemu-nbd is used for testing.
+Optional.
 
-L<virt-p2v(1)> requires either qemu-nbd or nbdkit, but these only need
-to be present on the virt-p2v ISO, they do not need to be installed at
-compile time.
+L<virt-p2v(1)> requires nbdkit, but it only needs to be present on the
+virt-p2v ISO, it does not need to be installed at compile time.
 
 =item Gtk E<ge> 2.24, or 3
 

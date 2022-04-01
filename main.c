@@ -99,7 +99,7 @@ usage (int status)
               " --cmdline=CMDLINE       Used to debug command line parsing\n"
               " --colors|--colours      Use ANSI colour sequences even if not tty\n"
               " --iso                   Running in the ISO environment\n"
-              " --nbd=qemu-nbd,nbdkit   Search order for NBD servers\n"
+              " --nbd=nbdkit            Search order for NBD servers\n"
               " --test-disk=DISK.IMG    For testing, use disk as /dev/sda\n"
               "  -v|--verbose           Verbose messages\n"
               "  -V|--version           Display version and exit\n"

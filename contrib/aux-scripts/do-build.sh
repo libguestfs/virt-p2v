@@ -59,7 +59,6 @@ case $osversion in
         sed -i -e 's/-Wno-strict-overflow//' configure
         # Apply some RHEL 5 only patches.
         patch -p1 < ../patches/0001-RHEL-5-ONLY-DISABLE-AUTOMATIC-REMOTE-PORT-ALLOCATION.patch
-        patch -p1 < ../patches/0002-RHEL-5-ONLY-QEMU-NBD-1.4-HAS-NO-f-OPTION.patch
         ;;
     rhel-6.*|centos-6.*)
         # This just forces configure to ignore these missing dependencies.
@@ -122,7 +121,8 @@ case $osversion in
             -e 's,^mesa-dri-drivers.*,,g' \
             -e 's,^network-manager-applet.*,,g' \
             -e 's,^nm-connection-editor.*,,g' \
-            -e 's,^/usr/bin/qemu-nbd.*,,g' \
+            -e 's,^nbdkit-server.*,,g' \
+            -e 's,^nbdkit-file-plugin.*,,g' \
             -e '/^net-tools/a syslinux' \
             p2v.ks
         # Remove systemctl lines, doesn't exist on RHEL 5.
@@ -137,7 +137,8 @@ case $osversion in
             -e 's,^firewalld.*,,g' \
             -e 's,^network-manager-applet.*,,g' \
             -e 's,^nm-connection-editor.*,,g' \
-            -e 's,^/usr/bin/qemu-nbd.*,,g' \
+            -e 's,^nbdkit-server.*,,g' \
+            -e 's,^nbdkit-file-plugin.*,,g' \
             p2v.ks
         # Remove systemctl lines, doesn't exist on RHEL 5.
         sed -i \

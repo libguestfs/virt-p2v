@@ -17,7 +17,7 @@
 
 /**
  * This file handles the virt-p2v I<--nbd> command line option
- * and running either L<qemu-nbd(8)> or L<nbdkit(1)>.
+ * and running L<nbdkit(1)>.
  */
 
 #include <config.h>
@@ -50,10 +50,8 @@ static int nbd_local_port;
 /* List of servers specified by the --nbd option. */
 enum nbd_server {
   /* 0 is reserved for "end of list" */
-  QEMU_NBD = 1,
-  QEMU_NBD_NO_SA = 2,
-  NBDKIT = 3,
-  NBDKIT_NO_SA = 4,
+  NBDKIT = 1,
+  NBDKIT_NO_SA = 2,
 };
 static enum nbd_server *cmdline_servers = NULL;
 
@@ -63,8 +61,6 @@ nbd_server_string (enum nbd_server s)
   const char *ret = NULL;
 
   switch (s) {
-  case QEMU_NBD: ret = "qemu-nbd"; break;
-  case QEMU_NBD_NO_SA: ret =  "qemu-nbd-no-sa"; break;
   case NBDKIT: ret = "nbdkit"; break;
   case NBDKIT_NO_SA: ret =  "nbdkit-no-sa"; break;
   }
@@ -79,14 +75,13 @@ nbd_server_string (enum nbd_server s)
  * Must match the documentation in virt-p2v(1).
  */
 static const enum nbd_server standard_servers[] =
-  { QEMU_NBD, QEMU_NBD_NO_SA, NBDKIT, NBDKIT_NO_SA, 0 };
+  { NBDKIT, NBDKIT_NO_SA, 0 };
 
 /* After testing the list of servers passed by the user, this is
  * server we decide to use.
  */
 static enum nbd_server use_server;
 
-static pid_t start_qemu_nbd (const char *device, const char *ipaddr, int port, int *fds, size_t nr_fds);
 static pid_t start_nbdkit (const char *device, const char *ipaddr, int port, int *fds, size_t nr_fds);
 static int get_local_port (void);
 static int open_listening_socket (const char *ipaddr, int **fds, size_t *nr_fds);
@@ -150,11 +145,7 @@ set_nbd_option (const char *opt)
     error (EXIT_FAILURE, errno, _("malloc"));
 
   for (i = 0; strs[i] != NULL; ++i) {
-    if (STREQ (strs[i], "qemu-nbd") || STREQ (strs[i], "qemu"))
-      cmdline_servers[i] = QEMU_NBD;
-    else if (STREQ (strs[i], "qemu-nbd-no-sa") || STREQ (strs[i], "qemu-no-sa"))
-      cmdline_servers[i] = QEMU_NBD_NO_SA;
-    else if (STREQ (strs[i], "nbdkit"))
+    if (STREQ (strs[i], "nbdkit"))
       cmdline_servers[i] = NBDKIT;
     else if (STREQ (strs[i], "nbdkit-no-sa"))
       cmdline_servers[i] = NBDKIT_NO_SA;
@@ -205,31 +196,6 @@ test_nbd_servers (void)
 #endif
 
     switch (servers[i]) {
-    case QEMU_NBD: /* with socket activation */
-      r = system ("qemu-nbd --version"
-#ifndef DEBUG_STDERR
-                  " >/dev/null 2>&1"
-#endif
-                  " && grep -sq LISTEN_PID `which qemu-nbd`"
-                  );
-      if (r == 0) {
-        use_server = servers[i];
-        goto finish;
-      }
-      break;
-
-    case QEMU_NBD_NO_SA:
-      r = system ("qemu-nbd --version"
-#ifndef DEBUG_STDERR
-                  " >/dev/null 2>&1"
-#endif
-                  );
-      if (r == 0) {
-        use_server = servers[i];
-        goto finish;
-      }
-      break;
-
     case NBDKIT: /* with socket activation */
       r = system ("nbdkit file --version"
 #ifndef DEBUG_STDERR
@@ -294,27 +260,6 @@ start_nbd_server (const char **ipaddr, int *port, const char *device)
   pid_t pid;
 
   switch (use_server) {
-  case QEMU_NBD:                /* qemu-nbd with socket activation */
-    /* Ideally we would bind this socket to "localhost", but that
-     * requires two listening FDs, and qemu-nbd currently cannot
-     * support socket activation with two FDs.  So we only bind to the
-     * IPv4 address.
-     */
-    *ipaddr = "127.0.0.1";
-    *port = open_listening_socket (*ipaddr, &fds, &nr_fds);
-    if (*port == -1) return -1;
-    pid = start_qemu_nbd (device, *ipaddr, *port, fds, nr_fds);
-    for (i = 0; i < nr_fds; ++i)
-      close (fds[i]);
-    free (fds);
-    return pid;
-
-  case QEMU_NBD_NO_SA:          /* qemu-nbd without socket activation */
-    *ipaddr = "localhost";
-    *port = get_local_port ();
-    if (*port == -1) return -1;
-    return start_qemu_nbd (device, *ipaddr, *port, NULL, 0);
-
   case NBDKIT:                  /* nbdkit with socket activation */
     *ipaddr = "localhost";
     *port = open_listening_socket (*ipaddr, &fds, &nr_fds);
@@ -364,77 +309,6 @@ socket_activation (int *fds, size_t nr_fds)
   setenv ("LISTEN_FDS", nr_fds_str, 1);
   snprintf (pid_str, sizeof pid_str, "%d", (int) getpid ());
   setenv ("LISTEN_PID", pid_str, 1);
-}
-
-/**
- * Start a local L<qemu-nbd(1)> process.
- *
- * If we are using socket activation, C<fds> and C<nr_fds> will
- * contain the locally pre-opened file descriptors for this.
- * Otherwise if C<fds == NULL> we pass the port number.
- *
- * Returns the process ID (E<gt> 0) or C<0> if there is an error.
- */
-static pid_t
-start_qemu_nbd (const char *device,
-                const char *ipaddr, int port, int *fds, size_t nr_fds)
-{
-  pid_t pid;
-  char port_str[64];
-
-#if DEBUG_STDERR
-  fprintf (stderr, "starting qemu-nbd for %s on %s:%d%s\n",
-           device, ipaddr, port,
-           fds == NULL ? "" : " using socket activation");
-#endif
-
-  snprintf (port_str, sizeof port_str, "%d", port);
-
-  pid = fork ();
-  if (pid == -1) {
-    set_nbd_error ("fork: %m");
-    return 0;
-  }
-
-  if (pid == 0) {               /* Child. */
-    close (0);
-    if (open ("/dev/null", O_RDONLY) == -1) {
-      perror ("open: /dev/null");
-      _exit (EXIT_FAILURE);
-    }
-
-    if (fds == NULL) {          /* without socket activation */
-      execlp ("qemu-nbd",
-              "qemu-nbd",
-              "-r",            /* readonly (vital!) */
-              "-p", port_str,  /* listening port */
-              "-t",            /* persistent */
-              "-f", "raw",     /* force raw format */
-              "-b", ipaddr,    /* listen only on loopback interface */
-              "--cache=unsafe",  /* use unsafe caching for speed */
-              device,            /* a device like /dev/sda */
-              NULL);
-      perror ("qemu-nbd");
-      _exit (EXIT_FAILURE);
-    }
-    else {                      /* socket activation */
-      socket_activation (fds, nr_fds);
-
-      execlp ("qemu-nbd",
-              "qemu-nbd",
-              "-r",            /* readonly (vital!) */
-              "-t",            /* persistent */
-              "-f", "raw",     /* force raw format */
-              "--cache=unsafe",  /* use unsafe caching for speed */
-              device,            /* a device like /dev/sda */
-              NULL);
-      perror ("qemu-nbd");
-      _exit (EXIT_FAILURE);
-    }
-  }
-
-  /* Parent. */
-  return pid;
 }
 
 /**

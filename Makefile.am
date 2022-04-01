@@ -31,7 +31,6 @@ EXTRA_DIST = \
 	contrib/aux-scripts/do-build.sh \
 	contrib/build-p2v-iso.sh \
 	contrib/patches/0001-RHEL-5-ONLY-DISABLE-AUTOMATIC-REMOTE-PORT-ALLOCATION.patch \
-	contrib/patches/0002-RHEL-5-ONLY-QEMU-NBD-1.4-HAS-NO-f-OPTION.patch \
 	contrib/test-p2v-iso.sh \
 	dependencies.m4 \
 	generate-p2v-authors.pl \
@@ -339,7 +338,6 @@ TESTS = \
 	test-virt-p2v-docs.sh
 
 LIBGUESTFS_TESTS = \
-	test-virt-p2v.sh \
 	test-virt-p2v-nbdkit.sh
 
 if HAVE_LIBGUESTFS

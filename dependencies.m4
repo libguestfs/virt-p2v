@@ -29,7 +29,8 @@ ifelse(REDHAT,1,
 
   dnl Run as external programs by the p2v binary.
   /usr/bin/ssh
-  /usr/bin/qemu-nbd
+  nbdkit-server
+  nbdkit-file-plugin
   which
 
   dnl Generally useful tools to use within xterm
@@ -66,7 +67,7 @@ ifelse(DEBIAN,1,
   ifelse(GTK_VERSION,2,libgtk`'GTK_VERSION`'.0-0,libgtk-`'GTK_VERSION`'-0)
   libdbus-1-3
   openssh-client
-  qemu-utils
+  nbdkit
   debianutils
   vim-tiny
   open-iscsi
@@ -86,7 +87,7 @@ ifelse(ARCHLINUX,1,
   gtk`'GTK_VERSION
   dbus
   openssh
-  qemu
+  nbdkit
   which
   vim-tiny
   open-iscsi
@@ -107,7 +108,8 @@ ifelse(SUSE,1,
   libxml2
   gtk`'GTK_VERSION
   libdbus-1-3
-  qemu-tools
+  nbdkit-server
+  nbdkit-file-plugin
   openssh
   dnl /usr/bin/which is in util-linux on SUSE
   vim
@@ -134,7 +136,8 @@ ifelse(OPENMANDRIVA,1,
 
   dnl Run as external programs by the p2v binary.
   /usr/bin/ssh
-  /usr/bin/qemu-nbd
+  nbdkit-server
+  nbdkit-file-plugin
   which
 
   dnl Generally useful tools to use within xterm

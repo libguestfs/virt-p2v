@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-# This is an ssh substitute used by test-virt-p2v.sh.
+# This is an ssh substitute used by test-virt-p2v-nbdkit.sh.
 
 TEMP=`getopt \
         -o 'l:No:p:R:' \
@@ -37,7 +37,7 @@ while true ; do
 
         # ssh -R 0:localhost:<port> (port forwarding).  Don't actually
         # port forward, just return the original port number here so that
-        # the conversion process connects directly to qemu-nbd.
+        # the conversion process connects directly to nbdkit.
         -R)
             arg="$2"
             port="$(echo $arg | awk -F: '{print $3}')"
