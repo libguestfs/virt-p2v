@@ -51,7 +51,6 @@ static int nbd_local_port;
 enum nbd_server {
   /* 0 is reserved for "end of list" */
   NBDKIT = 1,
-  NBDKIT_NO_SA = 2,
 };
 static enum nbd_server *cmdline_servers = NULL;
 
@@ -62,7 +61,6 @@ nbd_server_string (enum nbd_server s)
 
   switch (s) {
   case NBDKIT: ret = "nbdkit"; break;
-  case NBDKIT_NO_SA: ret =  "nbdkit-no-sa"; break;
   }
 
   if (ret == NULL)
@@ -75,7 +73,7 @@ nbd_server_string (enum nbd_server s)
  * Must match the documentation in virt-p2v(1).
  */
 static const enum nbd_server standard_servers[] =
-  { NBDKIT, NBDKIT_NO_SA, 0 };
+  { NBDKIT, 0 };
 
 /* After testing the list of servers passed by the user, this is
  * server we decide to use.
@@ -83,7 +81,6 @@ static const enum nbd_server standard_servers[] =
 static enum nbd_server use_server;
 
 static pid_t start_nbdkit (const char *device, const char *ipaddr, int port, int *fds, size_t nr_fds);
-static int get_local_port (void);
 static int open_listening_socket (const char *ipaddr, int **fds, size_t *nr_fds);
 static int bind_tcpip_socket (const char *ipaddr, const char *port, int **fds, size_t *nr_fds);
 static int connect_with_source_port (const char *hostname, int dest_port, int source_port);
@@ -147,8 +144,6 @@ set_nbd_option (const char *opt)
   for (i = 0; strs[i] != NULL; ++i) {
     if (STREQ (strs[i], "nbdkit"))
       cmdline_servers[i] = NBDKIT;
-    else if (STREQ (strs[i], "nbdkit-no-sa"))
-      cmdline_servers[i] = NBDKIT_NO_SA;
     else
       error (EXIT_FAILURE, 0, _("--nbd: unknown server: %s"), strs[i]);
   }
@@ -197,19 +192,6 @@ test_nbd_servers (void)
 
     switch (servers[i]) {
     case NBDKIT: /* with socket activation */
-      r = system ("nbdkit file --version"
-#ifndef DEBUG_STDERR
-                  " >/dev/null 2>&1"
-#endif
-                  " && grep -sq LISTEN_PID `which nbdkit`"
-                  );
-      if (r == 0) {
-        use_server = servers[i];
-        goto finish;
-      }
-      break;
-
-    case NBDKIT_NO_SA:
       r = system ("nbdkit file --version"
 #ifndef DEBUG_STDERR
                   " >/dev/null 2>&1"
@@ -269,12 +251,6 @@ start_nbd_server (const char **ipaddr, int *port, const char *device)
       close (fds[i]);
     free (fds);
     return pid;
-
-  case NBDKIT_NO_SA:            /* nbdkit without socket activation */
-    *ipaddr = "localhost";
-    *port = get_local_port ();
-    if (*port == -1) return -1;
-    return start_nbdkit (device, *ipaddr, *port, NULL, 0);
   }
 
   abort ();
@@ -383,22 +359,6 @@ start_nbdkit (const char *device,
 
   /* Parent. */
   return pid;
-}
-
-/**
- * This is used when we are starting an NBD server that does not
- * support socket activation.  We have to pass the '-p' option to
- * the NBD server, but there's no good way to choose a free port,
- * so we have to just guess.
- *
- * Returns the port number on success or C<-1> on error.
- */
-static int
-get_local_port (void)
-{
-  int port = nbd_local_port;
-  nbd_local_port++;
-  return port;
 }
 
 /**
