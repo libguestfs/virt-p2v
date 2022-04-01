@@ -44,6 +44,9 @@
  */
 static int nbd_local_port;
 
+/* Whether nbdkit recognizes "--exit-with-parent". */
+static bool nbd_exit_with_parent;
+
 static pid_t start_nbdkit (const char *device, int *fds, size_t nr_fds);
 static int open_listening_socket (int **fds, size_t *nr_fds);
 static int bind_tcpip_socket (const char *port, int **fds, size_t *nr_fds);
@@ -115,8 +118,16 @@ test_nbd_server (void)
     exit (EXIT_FAILURE);
   }
 
+  r = system ("nbdkit --exit-with-parent --version"
+#ifndef DEBUG_STDERR
+              " >/dev/null 2>&1"
+#endif
+              );
+  nbd_exit_with_parent = (r == 0);
+
 #if DEBUG_STDERR
-  fprintf (stderr, "found nbdkit\n");
+  fprintf (stderr, "found nbdkit (%s exit with parent)\n",
+           nbd_exit_with_parent ? "can" : "cannot");
 #endif
 }
 
@@ -203,6 +214,8 @@ start_nbdkit (const char *device, int *fds, size_t nr_fds)
   }
 
   if (pid == 0) {               /* Child. */
+    const char *nofork_opt;
+
     close (0);
     if (open ("/dev/null", O_RDONLY) == -1) {
       perror ("open: /dev/null");
@@ -211,10 +224,15 @@ start_nbdkit (const char *device, int *fds, size_t nr_fds)
 
     socket_activation (fds, nr_fds);
 
+    nofork_opt = nbd_exit_with_parent ?
+                 "--exit-with-parent" : /* don't fork, and exit when the parent
+                                         * thread does */
+                 "-f";                  /* don't fork */
+
     execlp ("nbdkit",
             "nbdkit",
             "-r",             /* readonly (vital!) */
-            "-f",             /* don't fork */
+            nofork_opt,
             "file",           /* file plugin */
             file_str,         /* a device like file=/dev/sda */
             NULL);
