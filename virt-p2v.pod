@@ -673,9 +673,9 @@ server and terminates on the conversion server, in fact NBD requests
 flow in the opposite direction.  This is because the reverse port
 forward feature of ssh (C<ssh -R>) is used to open a port on the
 loopback interface of the conversion server which is proxied back by
-ssh to the NBD server running on the physical machine.  The effect is
-that virt-v2v via libguestfs can open nbd connections which directly
-read the hard disk(s) of the physical server.
+ssh to nbdkit running on the physical machine.  The effect is that
+virt-v2v via libguestfs can open nbd connections which directly read
+the hard disk(s) of the physical server.
 
 Two layers of protection are used to ensure that there are no writes
 to the hard disks: Firstly, the nbdkit I<-r> (readonly) option is

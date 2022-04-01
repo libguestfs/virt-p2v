@@ -221,7 +221,7 @@ main (int argc, char *argv[])
     usage (EXIT_FAILURE);
   }
 
-  test_nbd_servers ();
+  test_nbd_server ();
 
   set_config_defaults (config);
 

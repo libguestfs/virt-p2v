@@ -36,30 +36,13 @@
 
 #include "p2v.h"
 
-/* How long to wait for the NBD server to start (seconds). */
+/* How long to wait for nbdkit to start (seconds). */
 #define WAIT_NBD_TIMEOUT 10
 
-/* The local port that the NBD server listens on (incremented for
- * each server which is started).
+/* The local port that nbdkit listens on (incremented for each server which is
+ * started).
  */
 static int nbd_local_port;
-
-/* Supported server types. */
-enum nbd_server {
-  /* 0 is reserved for "end of list" */
-  NBDKIT = 1,
-};
-
-/* We use this standard list of nbd server types. Must match the documentation
- * in virt-p2v(1).
- */
-static const enum nbd_server standard_servers[] =
-  { NBDKIT, 0 };
-
-/* After testing the list of servers passed by the user, this is
- * server we decide to use.
- */
-static enum nbd_server use_server;
 
 static pid_t start_nbdkit (const char *device, int *fds, size_t nr_fds);
 static int open_listening_socket (int **fds, size_t *nr_fds);
@@ -97,17 +80,12 @@ get_nbd_error (void)
 }
 
 /**
- * Test the built-in default list to see which servers are actually installed
- * and appear to be working.
- *
- * Set the C<use_server> global accordingly.
+ * Check for nbdkit.
  */
 void
-test_nbd_servers (void)
+test_nbd_server (void)
 {
-  size_t i;
   int r;
-  const enum nbd_server *servers;
 
   /* Initialize nbd_local_port. */
   if (is_iso_environment)
@@ -122,51 +100,30 @@ test_nbd_servers (void)
     /* When testing on the local machine, choose a random port. */
     nbd_local_port = 50000 + (random () % 10000);
 
-  servers = standard_servers;
-
-  use_server = 0;
-
-  for (i = 0; servers[i] != 0; ++i) {
 #if DEBUG_STDERR
-    fprintf (stderr, "checking for nbdkit ...\n");
+  fprintf (stderr, "checking for nbdkit ...\n");
 #endif
 
-    switch (servers[i]) {
-    case NBDKIT: /* with socket activation */
-      r = system ("nbdkit file --version"
+  r = system ("nbdkit file --version"
 #ifndef DEBUG_STDERR
-                  " >/dev/null 2>&1"
+              " >/dev/null 2>&1"
 #endif
-                  );
-      if (r == 0) {
-        use_server = servers[i];
-        goto finish;
-      }
-      break;
-
-    default:
-      abort ();
-    }
-  }
-
- finish:
-  if (use_server == 0) {
-    fprintf (stderr,
-             _("%s: no working NBD server was found, cannot continue.\n"),
+              );
+  if (r != 0) {
+    fprintf (stderr, _("%s: nbdkit was not found, cannot continue.\n"),
              g_get_prgname ());
     exit (EXIT_FAILURE);
   }
 
 #if DEBUG_STDERR
-  fprintf (stderr, "picked nbdkit\n");
+  fprintf (stderr, "found nbdkit\n");
 #endif
 }
 
 /**
- * Start the NBD server.
+ * Start nbdkit.
  *
- * We previously tested all NBD servers (see C<test_nbd_servers>) and
- * hopefully found one which will work.
+ * We previously tested nbdkit (see C<test_nbd_server>).
  *
  * Returns the process ID (E<gt> 0) or C<0> if there is an error.
  */
@@ -177,18 +134,13 @@ start_nbd_server (int *port, const char *device)
   size_t i, nr_fds;
   pid_t pid;
 
-  switch (use_server) {
-  case NBDKIT:                  /* nbdkit with socket activation */
-    *port = open_listening_socket (&fds, &nr_fds);
-    if (*port == -1) return -1;
-    pid = start_nbdkit (device, fds, nr_fds);
-    for (i = 0; i < nr_fds; ++i)
-      close (fds[i]);
-    free (fds);
-    return pid;
-  }
-
-  abort ();
+  *port = open_listening_socket (&fds, &nr_fds);
+  if (*port == -1) return -1;
+  pid = start_nbdkit (device, fds, nr_fds);
+  for (i = 0; i < nr_fds; ++i)
+    close (fds[i]);
+  free (fds);
+  return pid;
 }
 
 #define FIRST_SOCKET_ACTIVATION_FD 3
@@ -275,9 +227,7 @@ start_nbdkit (const char *device, int *fds, size_t nr_fds)
 }
 
 /**
- * This is used when we are starting an NBD server which supports
- * socket activation.  We can open a listening socket on an unused
- * local port and return it.
+ * Open a listening socket on an unused local port and return it.
  *
  * Returns the port number on success or C<-1> on error.
  *
@@ -396,8 +346,7 @@ bind_tcpip_socket (const char *port, int **fds_rtn, size_t *nr_fds_rtn)
 }
 
 /**
- * Wait for a local NBD server to start and be listening for
- * connections.
+ * Wait for nbdkit to start and be listening for connections.
  */
 int
 wait_for_nbd_server_to_start (int port)
@@ -417,7 +366,7 @@ wait_for_nbd_server_to_start (int port)
     time (&now_t);
 
     if (now_t - start_t >= WAIT_NBD_TIMEOUT) {
-      set_nbd_error ("timed out waiting for NBD server to start");
+      set_nbd_error ("timed out waiting for nbdkit to start");
       goto cleanup;
     }
 
@@ -431,8 +380,7 @@ wait_for_nbd_server_to_start (int port)
   time (&now_t);
   timeout.tv_sec = (start_t + WAIT_NBD_TIMEOUT) - now_t;
   if (setsockopt (sockfd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof timeout) == -1) {
-    set_nbd_error ("waiting for NBD server to start: "
-                   "setsockopt(SO_RCVTIMEO): %m");
+    set_nbd_error ("waiting for nbdkit to start: setsockopt(SO_RCVTIMEO): %m");
     goto cleanup;
   }
 
@@ -440,7 +388,7 @@ wait_for_nbd_server_to_start (int port)
     recvd = recv (sockfd, magic, sizeof magic - bytes_read, 0);
 
     if (recvd == -1) {
-      set_nbd_error ("waiting for NBD server to start: recv: %m");
+      set_nbd_error ("waiting for nbdkit to start: recv: %m");
       goto cleanup;
     }
 
@@ -448,8 +396,8 @@ wait_for_nbd_server_to_start (int port)
   } while (bytes_read < sizeof magic);
 
   if (memcmp (magic, "NBDMAGIC", sizeof magic) != 0) {
-    set_nbd_error ("waiting for NBD server to start: "
-                   "'NBDMAGIC' was not received from NBD server");
+    set_nbd_error ("waiting for nbdkit to start: "
+                   "'NBDMAGIC' was not received from nbdkit");
     goto cleanup;
   }
 
@@ -498,7 +446,7 @@ connect_to_nbdkit (int dest_port)
 
     /* Connect. */
     if (connect (sockfd, rp->ai_addr, rp->ai_addrlen) == -1) {
-      set_nbd_error ("waiting for NBD server to start: "
+      set_nbd_error ("waiting for nbdkit to start: "
                      "connect to localhost/%s: %m", dest_port_str);
       close (sockfd);
       sockfd = -1;
