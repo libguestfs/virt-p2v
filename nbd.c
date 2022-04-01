@@ -80,7 +80,7 @@ static const enum nbd_server standard_servers[] =
  */
 static enum nbd_server use_server;
 
-static pid_t start_nbdkit (const char *device, const char *ipaddr, int port, int *fds, size_t nr_fds);
+static pid_t start_nbdkit (const char *device, int *fds, size_t nr_fds);
 static int open_listening_socket (const char *ipaddr, int **fds, size_t *nr_fds);
 static int bind_tcpip_socket (const char *ipaddr, const char *port, int **fds, size_t *nr_fds);
 static int connect_with_source_port (const char *hostname, int dest_port, int source_port);
@@ -246,7 +246,7 @@ start_nbd_server (const char **ipaddr, int *port, const char *device)
     *ipaddr = "localhost";
     *port = open_listening_socket (*ipaddr, &fds, &nr_fds);
     if (*port == -1) return -1;
-    pid = start_nbdkit (device, *ipaddr, *port, fds, nr_fds);
+    pid = start_nbdkit (device, fds, nr_fds);
     for (i = 0; i < nr_fds; ++i)
       close (fds[i]);
     free (fds);
@@ -291,27 +291,20 @@ socket_activation (int *fds, size_t nr_fds)
  * Start a local L<nbdkit(1)> process using the
  * L<nbdkit-file-plugin(1)>.
  *
- * If we are using socket activation, C<fds> and C<nr_fds> will
- * contain the locally pre-opened file descriptors for this.
- * Otherwise if C<fds == NULL> we pass the port number.
+ * C<fds> and C<nr_fds> will contain the locally pre-opened file descriptors
+ * for this.
  *
  * Returns the process ID (E<gt> 0) or C<0> if there is an error.
  */
 static pid_t
-start_nbdkit (const char *device,
-              const char *ipaddr, int port, int *fds, size_t nr_fds)
+start_nbdkit (const char *device, int *fds, size_t nr_fds)
 {
   pid_t pid;
-  char port_str[64];
   CLEANUP_FREE char *file_str = NULL;
 
 #if DEBUG_STDERR
-  fprintf (stderr, "starting nbdkit for %s on %s:%d%s\n",
-           device, ipaddr, port,
-           fds == NULL ? "" : " using socket activation");
+  fprintf (stderr, "starting nbdkit for %s using socket activation\n", device);
 #endif
-
-  snprintf (port_str, sizeof port_str, "%d", port);
 
   if (asprintf (&file_str, "file=%s", device) == -1)
     error (EXIT_FAILURE, errno, "asprintf");
@@ -329,32 +322,17 @@ start_nbdkit (const char *device,
       _exit (EXIT_FAILURE);
     }
 
-    if (fds == NULL) {         /* without socket activation */
-      execlp ("nbdkit",
-              "nbdkit",
-              "-r",              /* readonly (vital!) */
-              "-p", port_str,    /* listening port */
-              "-i", ipaddr,      /* listen only on loopback interface */
-              "-f",              /* don't fork */
-              "file",            /* file plugin */
-              file_str,          /* a device like file=/dev/sda */
-              NULL);
-      perror ("nbdkit");
-      _exit (EXIT_FAILURE);
-    }
-    else {                      /* socket activation */
-      socket_activation (fds, nr_fds);
+    socket_activation (fds, nr_fds);
 
-      execlp ("nbdkit",
-              "nbdkit",
-              "-r",             /* readonly (vital!) */
-              "-f",             /* don't fork */
-              "file",           /* file plugin */
-              file_str,         /* a device like file=/dev/sda */
-              NULL);
-      perror ("nbdkit");
-      _exit (EXIT_FAILURE);
-    }
+    execlp ("nbdkit",
+            "nbdkit",
+            "-r",             /* readonly (vital!) */
+            "-f",             /* don't fork */
+            "file",           /* file plugin */
+            file_str,         /* a device like file=/dev/sda */
+            NULL);
+    perror ("nbdkit");
+    _exit (EXIT_FAILURE);
   }
 
   /* Parent. */
