@@ -235,12 +235,6 @@ start_conversion (struct config *config,
       goto out;
     }
 
-    /* Wait for NBD server to start up and listen. */
-    if (wait_for_nbd_server_to_start (nbd_local_port) == -1) {
-      set_conversion_error ("NBD server error: %s", get_nbd_error ());
-      goto out;
-    }
-
     if (notify_ui) {
       CLEANUP_FREE char *msg;
       if (asprintf (&msg,

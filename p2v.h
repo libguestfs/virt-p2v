@@ -113,7 +113,6 @@ extern int scp_file (struct config *config, const char *target, const char *loca
 /* nbd.c */
 extern void test_nbd_server (void);
 extern pid_t start_nbd_server (int *port, const char *device);
-extern int wait_for_nbd_server_to_start (int port);
 const char *get_nbd_error (void);
 
 /* utils.c */
