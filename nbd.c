@@ -15,10 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * This file handles the virt-p2v I<--nbd> command line option
- * and running L<nbdkit(1)>.
- */
+/* This file handles running L<nbdkit(1)>. */
 
 #include <config.h>
 
@@ -47,12 +44,11 @@
  */
 static int nbd_local_port;
 
-/* List of servers specified by the --nbd option. */
+/* Supported server types. */
 enum nbd_server {
   /* 0 is reserved for "end of list" */
   NBDKIT = 1,
 };
-static enum nbd_server *cmdline_servers = NULL;
 
 static const char *
 nbd_server_string (enum nbd_server s)
@@ -69,8 +65,8 @@ nbd_server_string (enum nbd_server s)
   return ret;
 }
 
-/* If no --nbd option is passed, we use this standard list instead.
- * Must match the documentation in virt-p2v(1).
+/* We use this standard list of nbd server types. Must match the documentation
+ * in virt-p2v(1).
  */
 static const enum nbd_server standard_servers[] =
   { NBDKIT, 0 };
@@ -116,44 +112,8 @@ get_nbd_error (void)
 }
 
 /**
- * The main program calls this to set the I<--nbd> option.
- */
-void
-set_nbd_option (const char *opt)
-{
-  size_t i, len;
-  CLEANUP_FREE_STRING_LIST char **strs = NULL;
-
-  if (cmdline_servers != NULL)
-    error (EXIT_FAILURE, 0, _("--nbd option appears multiple times"));
-
-  strs = guestfs_int_split_string (',', opt);
-
-  if (strs == NULL)
-    error (EXIT_FAILURE, errno, _("malloc"));
-
-  len = guestfs_int_count_strings (strs);
-  if (len == 0)
-    error (EXIT_FAILURE, 0, _("--nbd option cannot be empty"));
-
-  cmdline_servers = malloc (sizeof (enum nbd_server) * (len + 1));
-  if (cmdline_servers == NULL)
-    error (EXIT_FAILURE, errno, _("malloc"));
-
-  for (i = 0; strs[i] != NULL; ++i) {
-    if (STREQ (strs[i], "nbdkit"))
-      cmdline_servers[i] = NBDKIT;
-    else
-      error (EXIT_FAILURE, 0, _("--nbd: unknown server: %s"), strs[i]);
-  }
-
-  assert (i == len);
-  cmdline_servers[i] = 0;       /* marks the end of the list */
-}
-
-/**
- * Test the I<--nbd> option (or built-in default list) to see which
- * servers are actually installed and appear to be working.
+ * Test the built-in default list to see which servers are actually installed
+ * and appear to be working.
  *
  * Set the C<use_server> global accordingly.
  */
@@ -177,10 +137,7 @@ test_nbd_servers (void)
     /* When testing on the local machine, choose a random port. */
     nbd_local_port = 50000 + (random () % 10000);
 
-  if (cmdline_servers != NULL)
-    servers = cmdline_servers;
-  else
-    servers = standard_servers;
+  servers = standard_servers;
 
   use_server = 0;
 
@@ -210,15 +167,10 @@ test_nbd_servers (void)
  finish:
   if (use_server == 0) {
     fprintf (stderr,
-             _("%s: no working NBD server was found, cannot continue.\n"
-               "Please check the --nbd option in the virt-p2v(1) man page.\n"),
+             _("%s: no working NBD server was found, cannot continue.\n"),
              g_get_prgname ());
     exit (EXIT_FAILURE);
   }
-
-  /* Release memory used by the --nbd option. */
-  free (cmdline_servers);
-  cmdline_servers = NULL;
 
 #if DEBUG_STDERR
   fprintf (stderr, "picked %s\n", nbd_server_string (use_server));

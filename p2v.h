@@ -111,7 +111,6 @@ extern const char *get_ssh_error (void);
 extern int scp_file (struct config *config, const char *target, const char *local, ...) __attribute__((sentinel));
 
 /* nbd.c */
-extern void set_nbd_option (const char *opt);
 extern void test_nbd_servers (void);
 extern pid_t start_nbd_server (int *port, const char *device);
 extern int wait_for_nbd_server_to_start (int port);
