@@ -287,7 +287,8 @@ bind_tcpip_socket (const char *port, int **fds_rtn, size_t *nr_fds_rtn)
   int addr_in_use = 0;
 
   memset (&hints, 0, sizeof hints);
-  hints.ai_flags = AI_PASSIVE | AI_ADDRCONFIG;
+  hints.ai_family = AF_UNSPEC;
+  hints.ai_flags = AI_PASSIVE;
   hints.ai_socktype = SOCK_STREAM;
 
   err = getaddrinfo ("localhost", port, &hints, &ai);
