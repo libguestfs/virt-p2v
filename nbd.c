@@ -83,8 +83,7 @@ static enum nbd_server use_server;
 static pid_t start_nbdkit (const char *device, int *fds, size_t nr_fds);
 static int open_listening_socket (int **fds, size_t *nr_fds);
 static int bind_tcpip_socket (const char *port, int **fds, size_t *nr_fds);
-static int connect_with_source_port (int dest_port, int source_port);
-static int bind_source_port (int sockfd, int family, int source_port);
+static int connect_to_nbdkit (int dest_port);
 
 static char *nbd_error;
 
@@ -485,15 +484,7 @@ wait_for_nbd_server_to_start (int port)
       goto cleanup;
     }
 
-    /* Source port for probing NBD server should be one greater than
-     * port.  It's not guaranteed to always bind to this port, but it
-     * will hint the kernel to start there and try incrementally
-     * higher ports if needed.  This avoids the case where the kernel
-     * selects port as our source port, and we immediately connect to
-     * ourself.  See:
-     * https://bugzilla.redhat.com/show_bug.cgi?id=1167774#c9
-     */
-    sockfd = connect_with_source_port (port, port+1);
+    sockfd = connect_to_nbdkit (port);
     if (sockfd >= 0)
       break;
 
@@ -537,20 +528,16 @@ wait_for_nbd_server_to_start (int port)
  * Connect to C<localhost:dest_port>, resolving the address using
  * L<getaddrinfo(3)>.
  *
- * This also sets the source port of the connection to the first free
- * port number E<ge> C<source_port>.
- *
  * This may involve multiple connections - to IPv4 and IPv6 for
  * instance.
  */
 static int
-connect_with_source_port (int dest_port, int source_port)
+connect_to_nbdkit (int dest_port)
 {
   struct addrinfo hints;
   struct addrinfo *results, *rp;
   char dest_port_str[16];
   int r, sockfd = -1;
-  int reuseaddr = 1;
 
   snprintf (dest_port_str, sizeof dest_port_str, "%d", dest_port);
 
@@ -572,22 +559,6 @@ connect_with_source_port (int dest_port, int source_port)
     if (sockfd == -1)
       continue;
 
-    /* If we run p2v repeatedly (say, running the tests in a loop),
-     * there's a decent chance we'll end up trying to bind() to a port
-     * that is in TIME_WAIT from a prior run.  Handle that gracefully
-     * with SO_REUSEADDR.
-     */
-    if (setsockopt (sockfd, SOL_SOCKET, SO_REUSEADDR,
-                    &reuseaddr, sizeof reuseaddr) == -1)
-      perror ("warning: setsockopt");
-
-    /* Need to bind the source port. */
-    if (bind_source_port (sockfd, rp->ai_family, source_port) == -1) {
-      close (sockfd);
-      sockfd = -1;
-      continue;
-    }
-
     /* Connect. */
     if (connect (sockfd, rp->ai_addr, rp->ai_addrlen) == -1) {
       set_nbd_error ("waiting for NBD server to start: "
@@ -602,43 +573,4 @@ connect_with_source_port (int dest_port, int source_port)
 
   freeaddrinfo (results);
   return sockfd;
-}
-
-static int
-bind_source_port (int sockfd, int family, int source_port)
-{
-  struct addrinfo hints;
-  struct addrinfo *results, *rp;
-  char source_port_str[16];
-  int r;
-
-  snprintf (source_port_str, sizeof source_port_str, "%d", source_port);
-
-  memset (&hints, 0, sizeof (hints));
-  hints.ai_family = family;
-  hints.ai_socktype = SOCK_STREAM;
-  hints.ai_flags = AI_PASSIVE | AI_NUMERICSERV; /* numeric port number */
-  hints.ai_protocol = 0;                        /* any protocol */
-
-  r = getaddrinfo ("localhost", source_port_str, &hints, &results);
-  if (r != 0) {
-    set_nbd_error ("getaddrinfo (bind): localhost/%s: %s",
-                   source_port_str, gai_strerror (r));
-    return -1;
-  }
-
-  for (rp = results; rp != NULL; rp = rp->ai_next) {
-    if (bind (sockfd, rp->ai_addr, rp->ai_addrlen) == 0)
-      goto bound;
-  }
-
-  set_nbd_error ("waiting for NBD server to start: "
-                 "bind to source port %d: %m",
-                 source_port);
-  freeaddrinfo (results);
-  return -1;
-
- bound:
-  freeaddrinfo (results);
-  return 0;
 }
