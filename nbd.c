@@ -81,9 +81,9 @@ static const enum nbd_server standard_servers[] =
 static enum nbd_server use_server;
 
 static pid_t start_nbdkit (const char *device, int *fds, size_t nr_fds);
-static int open_listening_socket (const char *ipaddr, int **fds, size_t *nr_fds);
-static int bind_tcpip_socket (const char *ipaddr, const char *port, int **fds, size_t *nr_fds);
-static int connect_with_source_port (const char *hostname, int dest_port, int source_port);
+static int open_listening_socket (int **fds, size_t *nr_fds);
+static int bind_tcpip_socket (const char *port, int **fds, size_t *nr_fds);
+static int connect_with_source_port (int dest_port, int source_port);
 static int bind_source_port (int sockfd, int family, int source_port);
 
 static char *nbd_error;
@@ -235,7 +235,7 @@ test_nbd_servers (void)
  * Returns the process ID (E<gt> 0) or C<0> if there is an error.
  */
 pid_t
-start_nbd_server (const char **ipaddr, int *port, const char *device)
+start_nbd_server (int *port, const char *device)
 {
   int *fds = NULL;
   size_t i, nr_fds;
@@ -243,8 +243,7 @@ start_nbd_server (const char **ipaddr, int *port, const char *device)
 
   switch (use_server) {
   case NBDKIT:                  /* nbdkit with socket activation */
-    *ipaddr = "localhost";
-    *port = open_listening_socket (*ipaddr, &fds, &nr_fds);
+    *port = open_listening_socket (&fds, &nr_fds);
     if (*port == -1) return -1;
     pid = start_nbdkit (device, fds, nr_fds);
     for (i = 0; i < nr_fds; ++i)
@@ -350,7 +349,7 @@ start_nbdkit (const char *device, int *fds, size_t nr_fds)
  * The caller must free the array.
  */
 static int
-open_listening_socket (const char *ipaddr, int **fds, size_t *nr_fds)
+open_listening_socket (int **fds, size_t *nr_fds)
 {
   int port;
   char port_str[16];
@@ -361,7 +360,7 @@ open_listening_socket (const char *ipaddr, int **fds, size_t *nr_fds)
   /* Search for a free port. */
   for (; port < 60000; ++port) {
     snprintf (port_str, sizeof port_str, "%d", port);
-    if (bind_tcpip_socket (ipaddr, port_str, fds, nr_fds) == 0) {
+    if (bind_tcpip_socket (port_str, fds, nr_fds) == 0) {
       /* See above. */
       nbd_local_port = port + 1;
       return port;
@@ -373,8 +372,7 @@ open_listening_socket (const char *ipaddr, int **fds, size_t *nr_fds)
 }
 
 static int
-bind_tcpip_socket (const char *ipaddr, const char *port,
-                   int **fds_rtn, size_t *nr_fds_rtn)
+bind_tcpip_socket (const char *port, int **fds_rtn, size_t *nr_fds_rtn)
 {
   struct addrinfo *ai = NULL;
   struct addrinfo hints;
@@ -388,12 +386,11 @@ bind_tcpip_socket (const char *ipaddr, const char *port,
   hints.ai_flags = AI_PASSIVE | AI_ADDRCONFIG;
   hints.ai_socktype = SOCK_STREAM;
 
-  err = getaddrinfo (ipaddr, port, &hints, &ai);
+  err = getaddrinfo ("localhost", port, &hints, &ai);
   if (err != 0) {
 #if DEBUG_STDERR
-    fprintf (stderr, "%s: getaddrinfo: %s: %s: %s",
-             g_get_prgname (), ipaddr ? ipaddr : "<any>", port,
-             gai_strerror (err));
+    fprintf (stderr, "%s: getaddrinfo: localhost: %s: %s", g_get_prgname (),
+             port, gai_strerror (err));
 #endif
     return -1;
   }
@@ -446,16 +443,15 @@ bind_tcpip_socket (const char *ipaddr, const char *port,
 
   if (nr_fds == 0 && addr_in_use) {
 #if DEBUG_STDERR
-    fprintf (stderr, "%s: unable to bind to %s:%s: %s\n",
-             g_get_prgname (), ipaddr ? ipaddr : "<any>", port,
-             strerror (EADDRINUSE));
+    fprintf (stderr, "%s: unable to bind to localhost:%s: %s\n",
+             g_get_prgname (), port, strerror (EADDRINUSE));
 #endif
     return -1;
   }
 
 #if DEBUG_STDERR
-  fprintf (stderr, "%s: bound to IP address %s:%s (%zu socket(s))\n",
-           g_get_prgname (), ipaddr ? ipaddr : "<any>", port, nr_fds);
+  fprintf (stderr, "%s: bound to localhost:%s (%zu socket(s))\n",
+           g_get_prgname (), port, nr_fds);
 #endif
 
   *fds_rtn = fds;
@@ -468,7 +464,7 @@ bind_tcpip_socket (const char *ipaddr, const char *port,
  * connections.
  */
 int
-wait_for_nbd_server_to_start (const char *ipaddr, int port)
+wait_for_nbd_server_to_start (int port)
 {
   int sockfd = -1;
   int result = -1;
@@ -497,7 +493,7 @@ wait_for_nbd_server_to_start (const char *ipaddr, int port)
      * ourself.  See:
      * https://bugzilla.redhat.com/show_bug.cgi?id=1167774#c9
      */
-    sockfd = connect_with_source_port (ipaddr, port, port+1);
+    sockfd = connect_with_source_port (port, port+1);
     if (sockfd >= 0)
       break;
 
@@ -538,7 +534,7 @@ wait_for_nbd_server_to_start (const char *ipaddr, int port)
 }
 
 /**
- * Connect to C<hostname:dest_port>, resolving the address using
+ * Connect to C<localhost:dest_port>, resolving the address using
  * L<getaddrinfo(3)>.
  *
  * This also sets the source port of the connection to the first free
@@ -548,7 +544,7 @@ wait_for_nbd_server_to_start (const char *ipaddr, int port)
  * instance.
  */
 static int
-connect_with_source_port (const char *hostname, int dest_port, int source_port)
+connect_with_source_port (int dest_port, int source_port)
 {
   struct addrinfo hints;
   struct addrinfo *results, *rp;
@@ -564,10 +560,10 @@ connect_with_source_port (const char *hostname, int dest_port, int source_port)
   hints.ai_flags = AI_NUMERICSERV; /* numeric dest port number */
   hints.ai_protocol = 0;           /* any protocol */
 
-  r = getaddrinfo (hostname, dest_port_str, &hints, &results);
+  r = getaddrinfo ("localhost", dest_port_str, &hints, &results);
   if (r != 0) {
-    set_nbd_error ("getaddrinfo: %s/%s: %s",
-                   hostname, dest_port_str, gai_strerror (r));
+    set_nbd_error ("getaddrinfo: localhost/%s: %s",
+                   dest_port_str, gai_strerror (r));
     return -1;
   }
 
@@ -595,8 +591,7 @@ connect_with_source_port (const char *hostname, int dest_port, int source_port)
     /* Connect. */
     if (connect (sockfd, rp->ai_addr, rp->ai_addrlen) == -1) {
       set_nbd_error ("waiting for NBD server to start: "
-                     "connect to %s/%s: %m",
-                     hostname, dest_port_str);
+                     "connect to localhost/%s: %m", dest_port_str);
       close (sockfd);
       sockfd = -1;
       continue;

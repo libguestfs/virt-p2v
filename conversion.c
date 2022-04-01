@@ -202,7 +202,6 @@ start_conversion (struct config *config,
 
   /* Start the data connections and NBD server processes, one per disk. */
   for (i = 0; config->disks[i] != NULL; ++i) {
-    const char *nbd_local_ipaddr;
     int nbd_local_port;
     CLEANUP_FREE char *device = NULL;
 
@@ -230,15 +229,14 @@ start_conversion (struct config *config,
     }
 
     /* Start NBD server listening on the given port number. */
-    data_conns[i].nbd_pid =
-      start_nbd_server (&nbd_local_ipaddr, &nbd_local_port, device);
+    data_conns[i].nbd_pid = start_nbd_server (&nbd_local_port, device);
     if (data_conns[i].nbd_pid == 0) {
       set_conversion_error ("NBD server error: %s", get_nbd_error ());
       goto out;
     }
 
     /* Wait for NBD server to start up and listen. */
-    if (wait_for_nbd_server_to_start (nbd_local_ipaddr, nbd_local_port) == -1) {
+    if (wait_for_nbd_server_to_start (nbd_local_port) == -1) {
       set_conversion_error ("NBD server error: %s", get_nbd_error ());
       goto out;
     }
@@ -255,8 +253,7 @@ start_conversion (struct config *config,
     /* Open the SSH data connection, with reverse port forwarding
      * back to the NBD server.
      */
-    data_conns[i].h = open_data_connection (config,
-                                            nbd_local_ipaddr, nbd_local_port,
+    data_conns[i].h = open_data_connection (config, nbd_local_port,
                                             &data_conns[i].nbd_remote_port);
     if (data_conns[i].h == NULL) {
       const char *err = get_ssh_error ();
@@ -267,10 +264,10 @@ start_conversion (struct config *config,
 
 #if DEBUG_STDERR
     fprintf (stderr,
-             "%s: data connection for %s: SSH remote port %d, local port %s:%d\n",
+             "%s: data connection for %s: SSH remote port %d, local port %d\n",
              g_get_prgname (), device,
              data_conns[i].nbd_remote_port,
-             nbd_local_ipaddr, nbd_local_port);
+             nbd_local_port);
 #endif
   }
 
