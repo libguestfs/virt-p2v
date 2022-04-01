@@ -50,21 +50,6 @@ enum nbd_server {
   NBDKIT = 1,
 };
 
-static const char *
-nbd_server_string (enum nbd_server s)
-{
-  const char *ret = NULL;
-
-  switch (s) {
-  case NBDKIT: ret = "nbdkit"; break;
-  }
-
-  if (ret == NULL)
-    abort ();
-
-  return ret;
-}
-
 /* We use this standard list of nbd server types. Must match the documentation
  * in virt-p2v(1).
  */
@@ -143,7 +128,7 @@ test_nbd_servers (void)
 
   for (i = 0; servers[i] != 0; ++i) {
 #if DEBUG_STDERR
-    fprintf (stderr, "checking for %s ...\n", nbd_server_string (servers[i]));
+    fprintf (stderr, "checking for nbdkit ...\n");
 #endif
 
     switch (servers[i]) {
@@ -173,7 +158,7 @@ test_nbd_servers (void)
   }
 
 #if DEBUG_STDERR
-  fprintf (stderr, "picked %s\n", nbd_server_string (use_server));
+  fprintf (stderr, "picked nbdkit\n");
 #endif
 }
 
