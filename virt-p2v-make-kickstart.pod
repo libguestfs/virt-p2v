@@ -147,13 +147,25 @@ RHEL 6-based virt-p2v 0.9 they can boot on any hardware.
 
 =head2 TESTING THE P2V ISO USING QEMU
 
-You can use qemu to test-boot the P2V ISO:
+You can use qemu to test-boot the P2V ISO (BIOS mode):
 
  qemu-kvm -m 1024 -hda /tmp/guest.img -cdrom /tmp/livecd-p2v.iso -boot d
 
 Note that C<-hda> is the (virtual) system that you want to convert
 (for test purposes).  It could be any guest type supported by
 L<virt-v2v(1)>, including Windows or Red Hat Enterprise Linux.
+
+For UEFI:
+
+ qemu-kvm -m 1024 -M q35 \
+     -drive if=pflash,format=raw,file=/usr/share/OVMF/OVMF_CODE.fd,readonly=on \
+     -drive if=pflash,format=raw,file=/usr/share/OVMF/OVMF_VARS.fd,snapshot=on \
+     \
+     -drive if=none,format=raw,file=/tmp/guest.img,media=disk,id=guest-disk \
+     -device ide-hd,drive=guest-disk,bus=ide.0 \
+     \
+     -drive if=none,format=raw,file=/tmp/livecd-p2v.iso,media=cdrom,id=p2v-cdrom \
+     -device ide-cd,drive=p2v-cdrom,bus=ide.1,bootindex=1
 
 =head2 TESTING PXE SUPPORT USING QEMU
 

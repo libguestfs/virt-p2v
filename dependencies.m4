@@ -59,6 +59,10 @@ ifelse(REDHAT,1,
 
   dnl RHBZ#1157679
   @hardware-support
+
+  dnl UEFI Boot (RHBZ#2038105)
+  shim-x64
+  grub2-efi-x64-cdboot
 )
 
 ifelse(DEBIAN,1,
