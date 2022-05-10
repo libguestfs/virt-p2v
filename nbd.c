@@ -165,7 +165,7 @@ static inline void
 socket_activation (int *fds, size_t nr_fds)
 {
   size_t i;
-  char nr_fds_str[16];
+  char nr_fds_str[20];
   char pid_str[16];
 
   if (fds == NULL) return;
