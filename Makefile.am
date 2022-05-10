@@ -315,7 +315,7 @@ run-virt-p2v-non-gui-conversion: stamp-test-virt-p2v-pxe-data-files
 	SLOW=1 $(top_builddir)/run ./test-virt-p2v-pxe.sh
 
 $(PHYSICAL_MACHINE):
-	$(top_builddir)/run virt-builder --format raw -o $@ fedora-32
+	$(top_builddir)/run virt-builder --format raw -o $@ fedora-35
 
 $(BLANK_DISK):
 	$(top_builddir)/run guestfish -N $@=part exit
