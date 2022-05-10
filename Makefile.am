@@ -421,13 +421,30 @@ stamp-test-virt-p2v-pxe-userkey:
 	ssh-keygen -t rsa -f test-virt-p2v-pxe.id_rsa -N ''
 	touch $@
 
+# Check no files are missing from EXTRA_DIST rules, and that all
+# generated files have been included in the tarball.  (Note you must
+# have done 'make dist')
+maintainer-check-extra-dist:
+	@zcat $(PACKAGE_NAME)-$(VERSION).tar.gz | tar tf - | sort | \
+	  sed 's,^$(PACKAGE_NAME)-$(VERSION)/,,' > tarfiles
+	@git ls-files | \
+	  grep -v \
+	    -e '^\.cirrus.yml' \
+	    -e '^\.gitlab-ci.yml' \
+	    -e '^ci/' | \
+	    sort > gitfiles
+	@comm -13 tarfiles gitfiles > comm-out
+	@echo Checking for differences between EXTRA_DIST and git ...
+	@cat comm-out
+	@[ ! -s comm-out ]
+	@rm tarfiles gitfiles comm-out
+	@echo PASS: EXTRA_DIST tests
+
 # Commit everything in current directory to HEAD, and set commit
 # message to current version (only for maintainer).
-
 maintainer-commit:
 	git commit -a -m "Version $(VERSION)."
 
 # Tag HEAD with current version (only for maintainer).
-
 maintainer-tag:
 	git tag -a "v$(VERSION)" -m "Version $(VERSION)" -f
