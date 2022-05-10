@@ -27,6 +27,7 @@ SUBDIRS += bash
 EXTRA_DIST = \
 	$(BUILT_SOURCES) \
 	$(TESTS) $(LIBGUESTFS_TESTS) $(SLOW_TESTS) \
+	.gitignore \
 	AUTHORS \
 	contrib/aux-scripts/do-build.sh \
 	contrib/build-p2v-iso.sh \
@@ -49,6 +50,7 @@ EXTRA_DIST = \
 	test-virt-p2v-pxe.sshd_config.in \
 	test-virt-p2v-scp.sh \
 	test-virt-p2v-ssh.sh \
+	valgrind-suppressions \
 	virt-p2v.pod \
 	virt-p2v-make-disk.in \
 	virt-p2v-make-disk.pod \
