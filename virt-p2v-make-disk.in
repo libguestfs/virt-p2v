@@ -20,6 +20,9 @@ unset CDPATH
 
 program="virt-p2v-make-disk"
 version="@PACKAGE_VERSION@"
+prefix="@prefix@"
+exec_prefix="@exec_prefix@"
+datarootdir="@datarootdir@"
 
 if [ -n "$VIRT_P2V_DATA_DIR" ]; then
     datadir="$VIRT_P2V_DATA_DIR"

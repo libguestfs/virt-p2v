@@ -20,6 +20,9 @@ unset CDPATH
 
 program="virt-p2v-make-kiwi"
 version="@PACKAGE_VERSION@"
+prefix="@prefix@"
+exec_prefix="@exec_prefix@"
+datarootdir="@datarootdir@"
 
 # Parse the command line arguments.
 shortopts=o:V
