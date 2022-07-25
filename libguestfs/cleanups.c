@@ -61,6 +61,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define PCRE2_CODE_UNIT_WIDTH 8
+#include <pcre2.h>
+
 #include "guestfs-utils.h"
 
 /* Stdlib cleanups. */
@@ -93,4 +96,18 @@ void
 guestfs_int_cleanup_free_string_list (char ***ptr)
 {
   guestfs_int_free_string_list (*ptr);
+}
+
+void
+guestfs_int_cleanup_pcre2_match_data_free (void *ptr)
+{
+  pcre2_match_data *match_data = * (pcre2_match_data **) ptr;
+  pcre2_match_data_free (match_data);
+}
+
+void
+guestfs_int_cleanup_pcre2_substring_free (void *ptr)
+{
+  PCRE2_UCHAR *str = * (PCRE2_UCHAR **) ptr;
+  pcre2_substring_free (str);
 }

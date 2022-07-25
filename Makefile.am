@@ -140,13 +140,13 @@ virt_p2v_CPPFLAGS = \
 virt_p2v_CFLAGS = \
 	-pthread \
 	$(WARN_CFLAGS) $(WERROR_CFLAGS) \
-	$(PCRE_CFLAGS) \
+	$(PCRE2_CFLAGS) \
 	$(LIBXML2_CFLAGS) \
 	$(GTK_CFLAGS) \
 	$(DBUS_CFLAGS)
 
 virt_p2v_LDADD = \
-	$(PCRE_LIBS) \
+	$(PCRE2_LIBS) \
 	$(LIBXML2_LIBS) \
 	$(GTK_LIBS) \
 	$(DBUS_LIBS) \

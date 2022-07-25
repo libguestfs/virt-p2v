@@ -76,7 +76,7 @@ if [ ! -d "$d/aux-scripts" ]; then
 fi
 
 # Build the list of packages needed for the build environment.
-pkgs=augeas-devel,bison,coreutils,cpio,file-devel,flex,gcc,gperf,gtk2-devel,libxml2-devel,livecd-tools,mkisofs,ncurses-devel,patch,perl-Pod-Man,perl-Pod-Simple,pcre-devel,/usr/bin/pod2text,syslinux,syslinux-extlinux,xz,xz-devel
+pkgs=augeas-devel,bison,coreutils,cpio,file-devel,flex,gcc,gperf,gtk2-devel,libxml2-devel,livecd-tools,mkisofs,ncurses-devel,patch,perl-Pod-Man,perl-Pod-Simple,pcre2-devel,/usr/bin/pod2text,syslinux,syslinux-extlinux,xz,xz-devel
 
 for f in `cat $d/../../p2v/dependencies.redhat`; do
     pkgs="$pkgs,$f"

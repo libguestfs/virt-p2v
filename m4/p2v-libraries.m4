@@ -26,15 +26,8 @@ AC_CHECK_HEADERS([\
 dnl Which header file defines major, minor, makedev.
 AC_HEADER_MAJOR
 
-dnl Check for PCRE (required)
-PKG_CHECK_MODULES([PCRE], [libpcre], [], [
-    AC_CHECK_PROGS([PCRE_CONFIG], [pcre-config pcre2-config], [no])
-    AS_IF([test "x$PCRE_CONFIG" = "xno"], [
-        AC_MSG_ERROR([Please install the pcre devel package])
-    ])
-    PCRE_CFLAGS=`$PCRE_CONFIG --cflags`
-    PCRE_LIBS=`$PCRE_CONFIG --libs`
-])
+dnl Check for PCRE2 (required)
+PKG_CHECK_MODULES([PCRE2], [libpcre2-8])
 
 dnl libxml2 (required)
 PKG_CHECK_MODULES([LIBXML2], [libxml-2.0])

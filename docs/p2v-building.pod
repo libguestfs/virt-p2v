@@ -61,7 +61,7 @@ I<Required>.  Part of Perl core.
 I<Required> if compiling from git.
 Optional if compiling from tarball.
 
-=item Perl-compatible Regular Expressions (PCRE) library
+=item Perl-compatible Regular Expressions (PCRE2) library
 
 I<Required>.
 

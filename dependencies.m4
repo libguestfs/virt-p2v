@@ -22,7 +22,7 @@ dnl only runs on the virt-v2v conversion server.
 
 ifelse(REDHAT,1,
   dnl Used by the virt-p2v binary.
-  pcre
+  pcre2
   libxml2
   gtk`'GTK_VERSION
   dbus-libs
@@ -66,7 +66,7 @@ ifelse(REDHAT,1,
 )
 
 ifelse(DEBIAN,1,
-  libpcre3
+  libpcre2-8-0
   libxml2
   ifelse(GTK_VERSION,2,libgtk`'GTK_VERSION`'.0-0,libgtk-`'GTK_VERSION`'-0)
   libdbus-1-3
@@ -86,7 +86,7 @@ ifelse(DEBIAN,1,
 )
 
 ifelse(ARCHLINUX,1,
-  pcre
+  pcre2
   libxml2
   gtk`'GTK_VERSION
   dbus
@@ -108,7 +108,7 @@ ifelse(ARCHLINUX,1,
 )
 
 ifelse(SUSE,1,
-  pcre
+  pcre2
   libxml2
   gtk`'GTK_VERSION
   libdbus-1-3
@@ -133,7 +133,7 @@ ifelse(SUSE,1,
 
 ifelse(OPENMANDRIVA,1,
   dnl Used by the virt-p2v binary.
-  pcre
+  pcre2
   libxml2
   gtk`'GTK_VERSION
   dbus-libs

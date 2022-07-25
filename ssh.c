@@ -1,5 +1,5 @@
 /* virt-p2v
- * Copyright (C) 2009-2019 Red Hat Inc.
+ * Copyright (C) 2009-2022 Red Hat Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -113,94 +113,75 @@ get_ssh_error (void)
 static void compile_regexps (void) __attribute__((constructor));
 static void free_regexps (void) __attribute__((destructor));
 
-static pcre *password_re;
-static pcre *ssh_message_re;
-static pcre *sudo_password_re;
-static pcre *prompt_re;
-static pcre *version_re;
-static pcre *feature_libguestfs_rewrite_re;
-static pcre *feature_colours_option_re;
-static pcre *feature_input_re;
-static pcre *feature_output_re;
-static pcre *portfwd_re;
+static pcre2_code *password_re;
+static pcre2_code *ssh_message_re;
+static pcre2_code *sudo_password_re;
+static pcre2_code *prompt_re;
+static pcre2_code *version_re;
+static pcre2_code *feature_libguestfs_rewrite_re;
+static pcre2_code *feature_colours_option_re;
+static pcre2_code *feature_input_re;
+static pcre2_code *feature_output_re;
+static pcre2_code *portfwd_re;
 
 static void
 compile_regexps (void)
 {
-  const char *err;
-  int offset;
-  int p;
+  int errorcode;
+  PCRE2_SIZE offset;
+  char errormsg[256];
 
-  /* These regexps are always used for partial matching.  In pcre < 8
-   * there were limitations on the regexps possible for partial
-   * matching, so fail if that is true here.  In pcre >= 8, all
-   * regexps can be used in a partial match.
-   */
-#ifdef PCRE_INFO_OKPARTIAL
-#define CHECK_PARTIAL_OK(pattern, re)					\
-  do {									\
-    pcre_fullinfo ((re), NULL, PCRE_INFO_OKPARTIAL, &p);		\
-    if (p != 1) {							\
-      fprintf (stderr, "%s: %s:%d: internal error: pattern '%s' cannot be used for partial matching\n", \
-	       g_get_prgname (),				\
-	       __FILE__, __LINE__, (pattern));				\
-      abort ();								\
-    }									\
-  } while (0)
-#else
-#define CHECK_PARTIAL_OK(pattern, re) /* skip check */
-#endif
-
-#define COMPILE(re,pattern,options)                                     \
+#define COMPILE(re,pattern)                                             \
   do {                                                                  \
-    re = pcre_compile ((pattern), (options), &err, &offset, NULL);      \
+    re = pcre2_compile ((PCRE2_SPTR) (pattern),                         \
+                        PCRE2_ZERO_TERMINATED,                          \
+                        0, &errorcode, &offset, NULL);                  \
     if (re == NULL) {                                                   \
-      ignore_value (write (2, err, strlen (err)));                      \
+      pcre2_get_error_message (errorcode,                               \
+                               (PCRE2_UCHAR *) errormsg, sizeof errormsg); \
+      ignore_value (write (2, errormsg, strlen (errormsg)));            \
       abort ();                                                         \
     }                                                                   \
-    CHECK_PARTIAL_OK ((pattern), re);					\
   } while (0)
 
-  COMPILE (password_re, "password:", 0);
+  COMPILE (password_re, "password:");
   /* Note that (?:.)* is required in order to work around a problem
    * with partial matching and PCRE in RHEL 5.
    */
-  COMPILE (ssh_message_re, "(ssh: (?:.)*)", 0);
-  COMPILE (sudo_password_re, "sudo: a password is required", 0);
+  COMPILE (ssh_message_re, "(ssh: (?:.)*)");
+  COMPILE (sudo_password_re, "sudo: a password is required");
   /* The magic synchronization strings all match this expression.  See
    * start_ssh function below.
    */
   COMPILE (prompt_re,
-	   "###((?:[0123456789abcdefghijklmnopqrstuvwxyz]){8})### ", 0);
+	   "###((?:[0123456789abcdefghijklmnopqrstuvwxyz]){8})### ");
   /* Note that (?:.)* is required in order to work around a problem
    * with partial matching and PCRE in RHEL 5.
    */
-  COMPILE (version_re,
-           "virt-v2v ([1-9](?:.)*)",
-	   0);
-  COMPILE (feature_libguestfs_rewrite_re, "libguestfs-rewrite", 0);
-  COMPILE (feature_colours_option_re, "colours-option", 0);
+  COMPILE (version_re, "virt-v2v ([1-9](?:.)*)");
+  COMPILE (feature_libguestfs_rewrite_re, "libguestfs-rewrite");
+  COMPILE (feature_colours_option_re, "colours-option");
   /* The input and output regexps must match the same pattern in
    * v2v/modules_list.ml.
    */
-  COMPILE (feature_input_re, "input:((?:[-\\w])+)", 0);
-  COMPILE (feature_output_re, "output:((?:[-\\w])+)", 0);
-  COMPILE (portfwd_re, "Allocated port ((?:\\d)+) for remote forward", 0);
+  COMPILE (feature_input_re, "input:((?:[-\\w])+)");
+  COMPILE (feature_output_re, "output:((?:[-\\w])+)");
+  COMPILE (portfwd_re, "Allocated port ((?:\\d)+) for remote forward");
 }
 
 static void
 free_regexps (void)
 {
-  pcre_free (password_re);
-  pcre_free (ssh_message_re);
-  pcre_free (sudo_password_re);
-  pcre_free (prompt_re);
-  pcre_free (version_re);
-  pcre_free (feature_libguestfs_rewrite_re);
-  pcre_free (feature_colours_option_re);
-  pcre_free (feature_input_re);
-  pcre_free (feature_output_re);
-  pcre_free (portfwd_re);
+  pcre2_code_free (password_re);
+  pcre2_code_free (ssh_message_re);
+  pcre2_code_free (sudo_password_re);
+  pcre2_code_free (prompt_re);
+  pcre2_code_free (version_re);
+  pcre2_code_free (feature_libguestfs_rewrite_re);
+  pcre2_code_free (feature_colours_option_re);
+  pcre2_code_free (feature_input_re);
+  pcre2_code_free (feature_output_re);
+  pcre2_code_free (portfwd_re);
 }
 
 /**
@@ -328,8 +309,8 @@ start_ssh (unsigned spawn_flags, struct config *config,
   char port_str[64];
   char connect_timeout_str[128];
   mexp_h *h;
-  const int ovecsize = 12;
-  int ovector[ovecsize];
+  CLEANUP_PCRE2_MATCH_DATA pcre2_match_data *match_data =
+    pcre2_match_data_create (4, NULL);
   int saved_timeout;
   int using_password_auth;
   size_t count;
@@ -404,7 +385,8 @@ start_ssh (unsigned spawn_flags, struct config *config,
 
   if (using_password_auth &&
       config->auth.password && strlen (config->auth.password) > 0) {
-    CLEANUP_FREE char *ssh_message = NULL;
+    CLEANUP_PCRE2_SUBSTRING_FREE PCRE2_UCHAR *ssh_message = NULL;
+    PCRE2_SIZE ssh_msglen;
 
     /* Wait for the password prompt. */
   wait_password_again:
@@ -413,7 +395,7 @@ start_ssh (unsigned spawn_flags, struct config *config,
                            { 100, .re = password_re },
                            { 101, .re = ssh_message_re },
                            { 0 }
-                         }, ovector, ovecsize)) {
+                         }, match_data)) {
     case 100:                   /* Got password prompt. */
       if (mexp_printf_password (h, "%s", config->auth.password) == -1 ||
           mexp_printf (h, "\n") == -1) {
@@ -424,8 +406,8 @@ start_ssh (unsigned spawn_flags, struct config *config,
       break;
 
     case 101:
-      free (ssh_message);
-      ssh_message = strndup (&h->buffer[ovector[2]], ovector[3]-ovector[2]);
+      pcre2_substring_free (ssh_message);
+      pcre2_substring_get_bynumber (match_data, 1, &ssh_message, &ssh_msglen);
       goto wait_password_again;
 
     case MEXP_EOF:
@@ -436,7 +418,7 @@ start_ssh (unsigned spawn_flags, struct config *config,
        * generic error instead.
        */
       if (ssh_message)
-        set_ssh_error ("%s", ssh_message);
+        set_ssh_error ("%s", (char *) ssh_message);
       else
         set_ssh_error ("ssh closed the connection without printing an error.");
       mexp_close (h);
@@ -491,7 +473,8 @@ start_ssh (unsigned spawn_flags, struct config *config,
 
   for (count = 0; count < 30; ++count) {
     char magic[9];
-    const char *matched;
+    PCRE2_UCHAR *matched;
+    PCRE2_SIZE matchlen;
     int r;
 
     if (guestfs_int_random_string (magic, 8) == -1) {
@@ -516,7 +499,7 @@ start_ssh (unsigned spawn_flags, struct config *config,
                            { 100, .re = password_re },
                            { 101, .re = prompt_re },
                            { 0 }
-                         }, ovector, ovecsize)) {
+                         }, match_data)) {
     case 100:                    /* Got password prompt unexpectedly. */
       set_ssh_error ("Login failed.  Probably the username and/or password is wrong.");
       mexp_close (h);
@@ -526,12 +509,11 @@ start_ssh (unsigned spawn_flags, struct config *config,
       /* Got a prompt.  However it might be an earlier prompt.  If it
        * doesn't match the PS1 string we sent, then repeat the expect.
        */
-      r = pcre_get_substring (h->buffer, ovector,
-                              mexp_get_pcre_error (h), 1, &matched);
+      r = pcre2_substring_get_bynumber (match_data, 1, &matched, &matchlen);
       if (r < 0)
         error (EXIT_FAILURE, 0, "pcre error reading substring (%d)", r);
-      r = STREQ (magic, matched);
-      pcre_free_substring (matched);
+      r = STREQ (magic, (char *) matched);
+      pcre2_substring_free (matched);
       if (!r)
         goto wait_again;
       goto got_prompt;
@@ -592,8 +574,8 @@ scp_file (struct config *config, const char *target, const char *local, ...)
   char connect_timeout_str[128];
   CLEANUP_FREE char *remote = NULL;
   mexp_h *h;
-  const int ovecsize = 12;
-  int ovector[ovecsize];
+  CLEANUP_PCRE2_MATCH_DATA pcre2_match_data *match_data =
+    pcre2_match_data_create (4, NULL);
   int using_password_auth;
 
   if (cache_ssh_identity (config) == -1)
@@ -674,7 +656,8 @@ scp_file (struct config *config, const char *target, const char *local, ...)
 
   if (using_password_auth &&
       config->auth.password && strlen (config->auth.password) > 0) {
-    CLEANUP_FREE char *ssh_message = NULL;
+    CLEANUP_PCRE2_SUBSTRING_FREE PCRE2_UCHAR *ssh_message = NULL;
+    PCRE2_SIZE ssh_msglen;
 
     /* Wait for the password prompt. */
   wait_password_again:
@@ -683,7 +666,7 @@ scp_file (struct config *config, const char *target, const char *local, ...)
                            { 100, .re = password_re },
                            { 101, .re = ssh_message_re },
                            { 0 }
-                         }, ovector, ovecsize)) {
+                         }, match_data)) {
     case 100:                   /* Got password prompt. */
       if (mexp_printf_password (h, "%s", config->auth.password) == -1 ||
           mexp_printf (h, "\n") == -1) {
@@ -694,8 +677,8 @@ scp_file (struct config *config, const char *target, const char *local, ...)
       break;
 
     case 101:
-      free (ssh_message);
-      ssh_message = strndup (&h->buffer[ovector[2]], ovector[3]-ovector[2]);
+      pcre2_substring_free (ssh_message);
+      pcre2_substring_get_bynumber (match_data, 1, &ssh_message, &ssh_msglen);
       goto wait_password_again;
 
     case MEXP_EOF:
@@ -706,7 +689,7 @@ scp_file (struct config *config, const char *target, const char *local, ...)
        * generic error instead.
        */
       if (ssh_message)
-        set_ssh_error ("%s", ssh_message);
+        set_ssh_error ("%s", (char *) ssh_message);
       else
         set_ssh_error ("scp closed the connection without printing an error.");
       mexp_close (h);
@@ -730,7 +713,7 @@ scp_file (struct config *config, const char *target, const char *local, ...)
   }
 
   /* Wait for the scp subprocess to finish. */
-  switch (mexp_expect (h, NULL, NULL, 0)) {
+  switch (mexp_expect (h, NULL, NULL)) {
   case MEXP_EOF:
     break;
 
@@ -758,8 +741,8 @@ scp_file (struct config *config, const char *target, const char *local, ...)
   return 0;
 }
 
-static void add_input_driver (const char *name, size_t len);
-static void add_output_driver (const char *name, size_t len);
+static void add_input_driver (const char *name);
+static void add_output_driver (const char *name);
 static int compatible_version (const char *v2v_version);
 
 #if defined(__GNUC__) && !defined(__clang__)
@@ -771,8 +754,9 @@ test_connection (struct config *config)
   mexp_h *h;
   int feature_libguestfs_rewrite = 0;
   int status;
-  const int ovecsize = 12;
-  int ovector[ovecsize];
+  CLEANUP_PCRE2_MATCH_DATA pcre2_match_data *match_data =
+    pcre2_match_data_create (4, NULL);
+  PCRE2_SIZE verlen;
 
   h = start_ssh (0, config, NULL, 1);
   if (h == NULL)
@@ -802,10 +786,11 @@ test_connection (struct config *config)
                            { 101, .re = sudo_password_re },
                            { 102, .re = prompt_re },
                            { 0 }
-                         }, ovector, ovecsize)) {
+                         }, match_data)) {
     case 100:                   /* Got version string. */
       free (v2v_version);
-      v2v_version = strndup (&h->buffer[ovector[2]], ovector[3]-ovector[2]);
+      pcre2_substring_get_bynumber (match_data, 1,
+                                    (PCRE2_UCHAR **) &v2v_version, &verlen);
 #if DEBUG_STDERR
       fprintf (stderr, "%s: remote virt-v2v version: %s\n",
                g_get_prgname (), v2v_version);
@@ -874,6 +859,9 @@ test_connection (struct config *config)
   }
 
   for (;;) {
+    PCRE2_UCHAR *driver;
+    PCRE2_SIZE drvrlen;
+
     switch (mexp_expect (h,
                          (mexp_regexp[]) {
                            { 100, .re = feature_libguestfs_rewrite_re },
@@ -882,7 +870,7 @@ test_connection (struct config *config)
                            { 103, .re = feature_output_re },
                            { 104, .re = prompt_re },
                            { 0 }
-                         }, ovector, ovecsize)) {
+                         }, match_data)) {
     case 100:                   /* libguestfs-rewrite. */
       feature_libguestfs_rewrite = 1;
       break;
@@ -897,14 +885,16 @@ test_connection (struct config *config)
 
     case 102:
       /* input:<driver-name> corresponds to an -i option in virt-v2v. */
-      add_input_driver (&h->buffer[ovector[2]],
-                        (size_t) (ovector[3]-ovector[2]));
+      pcre2_substring_get_bynumber (match_data, 1, &driver, &drvrlen);
+      add_input_driver ((char *) driver);
+      pcre2_substring_free (driver);
       break;
 
     case 103:
       /* output:<driver-name> corresponds to an -o option in virt-v2v. */
-      add_output_driver (&h->buffer[ovector[2]],
-                         (size_t) (ovector[3]-ovector[2]));
+      pcre2_substring_get_bynumber (match_data, 1, &driver, &drvrlen);
+      add_output_driver ((char *) driver);
+      pcre2_substring_free (driver);
       break;
 
     case 104:                   /* Got prompt, so end of output. */
@@ -946,7 +936,7 @@ test_connection (struct config *config)
     return -1;
   }
 
-  switch (mexp_expect (h, NULL, NULL, 0)) {
+  switch (mexp_expect (h, NULL, NULL)) {
   case MEXP_EOF:
     break;
 
@@ -982,7 +972,7 @@ test_connection (struct config *config)
 }
 
 static void
-add_option (const char *type, char ***drivers, const char *name, size_t len)
+add_option (const char *type, char ***drivers, const char *name)
 {
   size_t n;
 
@@ -997,9 +987,9 @@ add_option (const char *type, char ***drivers, const char *name, size_t len)
   if (*drivers == NULL)
     error (EXIT_FAILURE, errno, "malloc");
 
-  (*drivers)[n-1] = strndup (name, len);
+  (*drivers)[n-1] = strdup (name);
   if ((*drivers)[n-1] == NULL)
-    error (EXIT_FAILURE, errno, "strndup");
+    error (EXIT_FAILURE, errno, "strdup");
   (*drivers)[n] = NULL;
 
 #if DEBUG_STDERR
@@ -1009,22 +999,22 @@ add_option (const char *type, char ***drivers, const char *name, size_t len)
 }
 
 static void
-add_input_driver (const char *name, size_t len)
+add_input_driver (const char *name)
 {
-  add_option ("input", &input_drivers, name, len);
+  add_option ("input", &input_drivers, name);
 }
 
 static void
-add_output_driver (const char *name, size_t len)
+add_output_driver (const char *name)
 {
   /* Ignore the 'vdsm' driver, since that should only be used by VDSM.
    * Ignore the 'openstack' and 'rhv-upload' drivers, since we do not
    * support passing all the options for them.
    */
-  if ((len != 4 || memcmp (name, "vdsm", 4) != 0) &&
-      (len != 9 || memcmp (name, "openstack", 9) != 0) &&
-      (len != 10 || memcmp (name, "rhv-upload", 10) != 0))
-    add_option ("output", &output_drivers, name, len);
+  if (STRNEQ (name, "vdsm") &&
+      STRNEQ (name, "openstack") &&
+      STRNEQ (name, "rhv-upload"))
+    add_option ("output", &output_drivers, name);
 }
 
 static int
@@ -1071,9 +1061,10 @@ open_data_connection (struct config *config, int local_port, int *remote_port)
     "-N",
     NULL
   };
-  CLEANUP_FREE char *port_str = NULL;
-  const int ovecsize = 12;
-  int ovector[ovecsize];
+  PCRE2_UCHAR *port_str;
+  PCRE2_SIZE portlen;
+  CLEANUP_PCRE2_MATCH_DATA pcre2_match_data *match_data =
+    pcre2_match_data_create (4, NULL);
 
   snprintf (remote_arg, sizeof remote_arg, "0:localhost:%d", local_port);
 
@@ -1085,20 +1076,22 @@ open_data_connection (struct config *config, int local_port, int *remote_port)
                        (mexp_regexp[]) {
                          { 100, .re = portfwd_re },
                          { 0 }
-                       }, ovector, ovecsize)) {
+                       }, match_data)) {
   case 100:                     /* Ephemeral port. */
-    port_str = strndup (&h->buffer[ovector[2]], ovector[3]-ovector[2]);
+    pcre2_substring_get_bynumber (match_data, 1, &port_str, &portlen);
     if (port_str == NULL) {
       set_ssh_internal_error ("strndup: %m");
       mexp_close (h);
       return NULL;
     }
-    if (sscanf (port_str, "%d", remote_port) != 1) {
+    if (sscanf ((char *) port_str, "%d", remote_port) != 1) {
       set_ssh_internal_error ("cannot extract the port number from '%s'",
                               port_str);
+      pcre2_substring_free (port_str);
       mexp_close (h);
       return NULL;
     }
+    pcre2_substring_free (port_str);
     break;
 
   case MEXP_EOF:
@@ -1129,14 +1122,14 @@ open_data_connection (struct config *config, int local_port, int *remote_port)
 static int
 wait_for_prompt (mexp_h *h)
 {
-  const int ovecsize = 12;
-  int ovector[ovecsize];
+  CLEANUP_PCRE2_MATCH_DATA pcre2_match_data *match_data =
+    pcre2_match_data_create (4, NULL);
 
   switch (mexp_expect (h,
                        (mexp_regexp[]) {
                          { 100, .re = prompt_re },
                          { 0 }
-                       }, ovector, ovecsize)) {
+                       }, match_data)) {
   case 100:                     /* Got the prompt. */
     return 0;
 
