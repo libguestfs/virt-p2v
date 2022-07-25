@@ -313,7 +313,7 @@ run-virt-p2v-in-an-nvme-vm: virt-p2v.img $(PHYSICAL_MACHINE) $(BLANK_DISK)
 	  &
 endif HAVE_LIBGUESTFS
 
-run-virt-p2v-non-gui-conversion: stamp-test-virt-p2v-pxe-data-files
+run-virt-p2v-non-gui-conversion: $(PHYSICAL_MACHINE) stamp-test-virt-p2v-pxe-data-files
 	SLOW=1 $(top_builddir)/run ./test-virt-p2v-pxe.sh
 
 $(PHYSICAL_MACHINE):
