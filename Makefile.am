@@ -270,7 +270,7 @@ run-virt-p2v-in-a-vm: virt-p2v.img $(PHYSICAL_MACHINE)
 	  -cpu host \
 	  -m 2048 \
 	  -drive id=hd0,file=$(PHYSICAL_MACHINE),format=raw,if=ide \
-	  -device piix3-usb-uhci \
+	  -device qemu-xhci \
 	  -drive id=usb0,file=$<,format=raw,snapshot=on,if=none \
 	  -device usb-storage,bootindex=1,drive=usb0 \
 	  -boot menu=on \
@@ -294,7 +294,7 @@ run-virt-p2v-in-an-nvme-vm: virt-p2v.img $(PHYSICAL_MACHINE) $(BLANK_DISK)
 	  -device nvme,drive=phys,serial=01234567 \
 	  \
 	  -drive id=usb0,if=none,format=raw,file=$<,snapshot=on \
-	  -device piix3-usb-uhci,id=usb-bus \
+	  -device qemu-xhci,id=usb-bus \
 	  -device usb-storage,drive=usb0,bootindex=1,bus=usb-bus.0 \
 	  \
 	  -drive id=blank1,if=none,format=raw,file=$(BLANK_DISK),snapshot=on \
