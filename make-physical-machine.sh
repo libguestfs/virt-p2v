@@ -32,6 +32,6 @@ trap cleanup EXIT
 output=$1
 outdir=$(dirname -- "$output")
 disk=$(mktemp -p "$outdir" physical-machine.tmp.XXXXXXXXXX)
-virt-builder --format raw -o "$disk" fedora-35
+virt-builder --format raw -o "$disk" --root-password password:p2v-phys fedora-35
 mv -- "$disk" "$output"
 disk=
