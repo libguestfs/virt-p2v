@@ -41,6 +41,7 @@ Makefile.in
 /m4/ltsugar.m4
 /m4/ltversion.m4
 /p2v-config.h
+/physical-machine.tmp.*
 /podwrapper.pl
 /run
 /stamp-h1

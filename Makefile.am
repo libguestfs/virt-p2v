@@ -41,6 +41,7 @@ EXTRA_DIST = \
 	kiwi-config.xml.in \
 	launch-virt-p2v \
 	libguestfs/README \
+	make-physical-machine.sh \
 	miniexpect/README \
 	p2v.ks.in \
 	p2v.service \
@@ -66,6 +67,7 @@ CLEANFILES += \
 	$(generated_sources) \
 	$(PHYSICAL_MACHINE) $(BLANK_DISK) \
 	about-authors.c \
+	physical-machine.tmp.* \
 	stamp-test-virt-p2v-pxe-data-files \
 	stamp-test-virt-p2v-pxe-kernel \
 	test-virt-p2v-pxe.authorized_keys \
@@ -255,6 +257,7 @@ if HAVE_LIBGUESTFS
 check_DATA += \
 	$(PHYSICAL_MACHINE) \
 	$(BLANK_DISK)
+check_SCRIPTS = make-physical-machine.sh
 endif HAVE_LIBGUESTFS
 
 run-virt-p2v-directly: $(PHYSICAL_MACHINE)
@@ -317,7 +320,7 @@ run-virt-p2v-non-gui-conversion: $(PHYSICAL_MACHINE) stamp-test-virt-p2v-pxe-dat
 	SLOW=1 $(top_builddir)/run ./test-virt-p2v-pxe.sh
 
 $(PHYSICAL_MACHINE):
-	$(top_builddir)/run virt-builder --format raw -o $@ fedora-35
+	$(top_builddir)/run ./make-physical-machine.sh $@
 
 $(BLANK_DISK):
 	$(top_builddir)/run guestfish -N $@=part exit
