@@ -63,7 +63,7 @@ typedef enum
  */
 #define table_new(grid, rows, columns)          \
   (grid) = gtk_grid_new ()
-#define table_attach(grid, child, left, right, top, bottom, xoptions, yoptions, xpadding, ypadding) \
+#define table_attach(grid, child, left, right, top, xoptions, yoptions, xpadding, ypadding) \
   do {                                                                  \
     if (((xoptions) & GTK_EXPAND) != 0)                                 \
       gtk_widget_set_hexpand ((child), TRUE);                           \
@@ -75,14 +75,14 @@ typedef enum
       gtk_widget_set_valign ((child), GTK_ALIGN_FILL);                  \
     set_padding ((child), (xpadding), (ypadding));                      \
     gtk_grid_attach (GTK_GRID (grid), (child),                          \
-                     (left), (top), (right)-(left), (bottom)-(top));    \
+                     (left), (top), (right)-(left), 1);    \
   } while (0)
 #else
 #define table_new(table, rows, columns)                 \
   (table) = gtk_table_new ((rows), (columns), FALSE)
-#define table_attach(table, child, left, right,top, bottom, xoptions, yoptions, xpadding, ypadding) \
+#define table_attach(table, child, left, right,top, xoptions, yoptions, xpadding, ypadding) \
   gtk_table_attach (GTK_TABLE (table), (child),                         \
-                    (left), (right), (top), (bottom),                   \
+                    (left), (right), (top), (top + 1),                   \
                     (xoptions), (yoptions), (xpadding), (ypadding))
 #endif
 
