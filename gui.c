@@ -121,12 +121,13 @@ static GtkWidget *conn_dlg,
 
 /* The conversion dialog. */
 static GtkWidget *conv_dlg,
-  *guestname_entry, *vcpus_entry, *memory_entry,
+  *guestname_entry, *vcpu_topo, *vcpus_entry, *memory_entry,
   *vcpus_warning, *memory_warning, *target_warning_label,
   *o_combo, *oc_entry, *os_entry, *of_entry, *oa_combo,
   *info_label,
   *disks_list, *removable_list, *interfaces_list,
   *start_button;
+static int vcpus_entry_when_last_sensitive;
 
 /* The running dialog which is displayed when virt-v2v is running. */
 static GtkWidget *run_dlg,
@@ -690,8 +691,10 @@ static void set_removable_from_ui (struct config *);
 static void set_interfaces_from_ui (struct config *);
 static void conversion_back_clicked (GtkWidget *w, gpointer data);
 static void start_conversion_clicked (GtkWidget *w, gpointer data);
+static void vcpu_topo_toggled (GtkWidget *w, gpointer data);
 static void vcpus_or_memory_check_callback (GtkWidget *w, gpointer data);
 static void notify_ui_callback (int type, const char *data);
+static bool get_phys_topo_from_conv_dlg (void);
 static int get_vcpus_from_conv_dlg (void);
 static uint64_t get_memory_from_conv_dlg (void);
 
@@ -756,7 +759,7 @@ create_conversion_dialog (struct config *config)
 
   vbox_new (target_vbox, FALSE, 1);
 
-  table_new (target_tbl, 3, 3);
+  table_new (target_tbl, 4, 3);
   row = 0;
   guestname_label = gtk_label_new_with_mnemonic (_("_Name:"));
   table_attach (target_tbl, guestname_label,
@@ -770,6 +773,13 @@ create_conversion_dialog (struct config *config)
                 1, 2, row, GTK_FILL, GTK_FILL, 1, 1);
 
   row++;
+  vcpu_topo = gtk_check_button_new_with_mnemonic (
+                _("Copy fully populated _pCPU topology"));
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (vcpu_topo),
+                                config->vcpu.phys_topo);
+  table_attach (target_tbl, vcpu_topo, 0, 2, row, GTK_FILL, GTK_FILL, 1, 1);
+
+  row++;
   vcpus_label = gtk_label_new_with_mnemonic (_("# _vCPUs:"));
   table_attach (target_tbl, vcpus_label,
                 0, 1, row, GTK_FILL, GTK_FILL, 1, 1);
@@ -778,6 +788,7 @@ create_conversion_dialog (struct config *config)
   gtk_label_set_mnemonic_widget (GTK_LABEL (vcpus_label), vcpus_entry);
   snprintf (vcpus_str, sizeof vcpus_str, "%d", config->vcpu.cores);
   gtk_entry_set_text (GTK_ENTRY (vcpus_entry), vcpus_str);
+  vcpus_entry_when_last_sensitive = config->vcpu.cores;
   table_attach (target_tbl, vcpus_entry,
                 1, 2, row, GTK_FILL, GTK_FILL, 1, 1);
   vcpus_warning = gtk_image_new_from_stock (GTK_STOCK_DIALOG_WARNING,
@@ -970,6 +981,8 @@ create_conversion_dialog (struct config *config)
                     G_CALLBACK (conversion_back_clicked), NULL);
   g_signal_connect (G_OBJECT (start_button), "clicked",
                     G_CALLBACK (start_conversion_clicked), config);
+  g_signal_connect (G_OBJECT (vcpu_topo), "toggled",
+                    G_CALLBACK (vcpu_topo_toggled), NULL);
   g_signal_connect (G_OBJECT (vcpus_entry), "changed",
                     G_CALLBACK (vcpus_or_memory_check_callback), NULL);
   g_signal_connect (G_OBJECT (memory_entry), "changed",
@@ -988,6 +1001,7 @@ show_conversion_dialog (void)
 
   /* Show the conversion dialog. */
   gtk_widget_show_all (conv_dlg);
+  vcpu_topo_toggled (NULL, NULL);
   vcpus_or_memory_check_callback (NULL, NULL);
 
   /* output_drivers may have been updated, so repopulate o_combo. */
@@ -1534,6 +1548,28 @@ concat_warning (char *warning, const char *fs, ...)
   return warning;
 }
 
+static void
+vcpu_topo_toggled (GtkWidget *w, gpointer data)
+{
+  bool phys_topo;
+  unsigned vcpus;
+  char vcpus_str[64];
+
+  phys_topo = get_phys_topo_from_conv_dlg ();
+  if (phys_topo) {
+    struct cpu_topo topo;
+
+    get_cpu_topology (&topo);
+    vcpus = topo.sockets * topo.cores * topo.threads;
+    vcpus_entry_when_last_sensitive = get_vcpus_from_conv_dlg ();
+  } else
+    vcpus = vcpus_entry_when_last_sensitive;
+
+  snprintf (vcpus_str, sizeof vcpus_str, "%u", vcpus);
+  gtk_entry_set_text (GTK_ENTRY (vcpus_entry), vcpus_str);
+  gtk_widget_set_sensitive (vcpus_entry, !phys_topo);
+}
+
 /**
  * Display a warning if the vCPUs or memory is outside the supported
  * range (L<https://bugzilla.redhat.com/823758>).
@@ -1575,6 +1611,12 @@ vcpus_or_memory_check_callback (GtkWidget *w, gpointer data)
   }
   else
     gtk_label_set_text (GTK_LABEL (target_warning_label), "");
+}
+
+static bool
+get_phys_topo_from_conv_dlg (void)
+{
+  return gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (vcpu_topo));
 }
 
 static int
@@ -2025,6 +2067,7 @@ start_conversion_clicked (GtkWidget *w, gpointer data)
     return;
   }
 
+  config->vcpu.phys_topo = get_phys_topo_from_conv_dlg ();
   config->vcpu.cores = get_vcpus_from_conv_dlg ();
   config->memory = get_memory_from_conv_dlg ();
 
