@@ -973,8 +973,7 @@ show_conversion_dialog (void)
 
   /* Show the conversion dialog. */
   gtk_widget_show_all (conv_dlg);
-  gtk_widget_hide (vcpus_warning);
-  gtk_widget_hide (memory_warning);
+  vcpus_or_memory_check_callback (NULL, NULL);
 
   /* output_drivers may have been updated, so repopulate o_combo. */
   repopulate_output_combo (NULL);
