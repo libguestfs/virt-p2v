@@ -268,6 +268,7 @@ run-virt-p2v-in-a-vm: virt-p2v.img $(PHYSICAL_MACHINE)
 	$(shell guestfish get-hv) \
 	  -M pc,accel=kvm:tcg \
 	  -cpu host \
+	  -smp sockets=1,cores=2,threads=2 \
 	  -m 2048 \
 	  -drive id=hd0,file=$(PHYSICAL_MACHINE),format=raw,if=ide \
 	  -device qemu-xhci \
@@ -287,6 +288,7 @@ run-virt-p2v-in-an-nvme-vm: virt-p2v.img $(PHYSICAL_MACHINE) $(BLANK_DISK)
 	$(shell guestfish get-hv) \
 	  -M pc,accel=kvm:tcg \
 	  -cpu host \
+	  -smp sockets=1,cores=2,threads=2 \
 	  -m 2048 \
 	  -boot menu=on \
 	  \
