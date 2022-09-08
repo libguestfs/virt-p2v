@@ -767,7 +767,7 @@ create_conversion_dialog (struct config *config)
   set_alignment (vcpus_label, 1., 0.5);
   vcpus_entry = gtk_entry_new ();
   gtk_label_set_mnemonic_widget (GTK_LABEL (vcpus_label), vcpus_entry);
-  snprintf (vcpus_str, sizeof vcpus_str, "%d", config->vcpus);
+  snprintf (vcpus_str, sizeof vcpus_str, "%d", config->vcpu.cores);
   gtk_entry_set_text (GTK_ENTRY (vcpus_entry), vcpus_str);
   table_attach (target_tbl, vcpus_entry,
                 1, 2, 1, 2, GTK_FILL, GTK_FILL, 1, 1);
@@ -2010,7 +2010,7 @@ start_conversion_clicked (GtkWidget *w, gpointer data)
     return;
   }
 
-  config->vcpus = get_vcpus_from_conv_dlg ();
+  config->vcpu.cores = get_vcpus_from_conv_dlg ();
   config->memory = get_memory_from_conv_dlg ();
 
   /* Get the list of disks to be converted. */

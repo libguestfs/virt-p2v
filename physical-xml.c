@@ -62,6 +62,7 @@ generate_physical_xml (struct config *config, struct data_conn *data_conns,
   uint64_t memkb;
   CLEANUP_XMLFREETEXTWRITER xmlTextWriterPtr xo = NULL;
   size_t i;
+  struct cpu_topo topo;
 
   xo = xmlNewTextWriterFilename (filename, 0);
   if (xo == NULL)
@@ -104,33 +105,34 @@ generate_physical_xml (struct config *config, struct data_conn *data_conns,
       string_format ("%" PRIu64, memkb);
     } end_element ();
 
-    single_element_format ("vcpu", "%d", config->vcpus);
-
-    if (config->cpu.vendor || config->cpu.model ||
-        config->cpu.sockets || config->cpu.cores || config->cpu.threads) {
-      /* https://libvirt.org/formatdomain.html#elementsCPU */
-      start_element ("cpu") {
-        attribute ("match", "minimum");
-        if (config->cpu.vendor)
-          single_element ("vendor", config->cpu.vendor);
-        if (config->cpu.model) {
-          start_element ("model") {
-            attribute ("fallback", "allow");
-            string (config->cpu.model);
-          } end_element ();
-        }
-        if (config->cpu.sockets || config->cpu.cores || config->cpu.threads) {
-          start_element ("topology") {
-            if (config->cpu.sockets)
-              attribute_format ("sockets", "%u", config->cpu.sockets);
-            if (config->cpu.cores)
-              attribute_format ("cores", "%u", config->cpu.cores);
-            if (config->cpu.threads)
-              attribute_format ("threads", "%u", config->cpu.threads);
-          } end_element ();
-        }
-      } end_element ();
+    if (config->vcpu.phys_topo)
+      get_cpu_topology (&topo);
+    else {
+      topo.sockets = 1;
+      topo.cores = config->vcpu.cores;
+      topo.threads = 1;
     }
+
+    single_element_format ("vcpu", "%u",
+                           topo.sockets * topo.cores * topo.threads);
+
+    /* https://libvirt.org/formatdomain.html#elementsCPU */
+    start_element ("cpu") {
+      attribute ("match", "minimum");
+      if (config->cpu.vendor)
+        single_element ("vendor", config->cpu.vendor);
+      if (config->cpu.model) {
+        start_element ("model") {
+          attribute ("fallback", "allow");
+          string (config->cpu.model);
+        } end_element ();
+      }
+      start_element ("topology") {
+        attribute_format ("sockets", "%u", topo.sockets);
+        attribute_format ("cores", "%u", topo.cores);
+        attribute_format ("threads", "%u", topo.threads);
+      } end_element ();
+    } end_element ();
 
     switch (config->rtc.basis) {
     case BASIS_UNKNOWN:

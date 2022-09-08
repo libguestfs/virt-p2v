@@ -110,16 +110,19 @@ my @fields = [
     ],
   ),
   ConfigString->new(name => 'guestname'),
-  ConfigInt->new(name => 'vcpus', value => 0),
+  ConfigSection->new(
+    name => 'vcpu',
+    elements => [
+      ConfigBool->new(name => 'phys_topo'),
+      ConfigInt->new(name => 'cores', value => 0),
+    ],
+  ),
   ConfigUInt64->new(name => 'memory'),
   ConfigSection->new(
     name => 'cpu',
     elements => [
       ConfigString->new(name => 'vendor'),
       ConfigString->new(name => 'model'),
-      ConfigUnsigned->new(name => 'sockets'),
-      ConfigUnsigned->new(name => 'cores'),
-      ConfigUnsigned->new(name => 'threads'),
       ConfigBool->new(name => 'acpi'),
       ConfigBool->new(name => 'apic'),
       ConfigBool->new(name => 'pae'),
@@ -231,11 +234,21 @@ The name of the guest that is created.  The default is to try to
 derive a name from the physical machine’s hostname (if possible) else
 use a randomly generated name.",
   ),
-  "p2v.vcpus" => manual_entry->new(
+  "p2v.vcpu.phys_topo" => manual_entry->new(
+    shortopt => "", # ignored for booleans
+    description => "
+Copy the physical machine's complete CPU topology (sockets, cores and
+threads) to the guest.  Disabled by default.  If disabled, the
+C<p2v.vcpu.cores> setting takes effect.",
+  ),
+  "p2v.vcpu.cores" => manual_entry->new(
     shortopt => "N",
     description => "
-The number of virtual CPUs to give to the guest.  The default is to
-use the same as the number of physical CPUs.",
+This setting is ignored if C<p2v.vcpu.phys_topo> is enabled.  Otherwise,
+it specifies the flat number of vCPU cores to give to the guest (placing
+all of those cores into a single socket, and exposing one thread per
+core).  The default value is the number of online logical processors on
+the physical machine.",
   ),
   "p2v.memory" => manual_entry->new(
     shortopt => "n(M|G)",
@@ -258,24 +271,6 @@ the same CPU vendor as the physical machine.",
     description => "
 The vCPU model, eg. \"IvyBridge\".  The default is to use the same
 CPU model as the physical machine.",
-  ),
-  "p2v.cpu.sockets" => manual_entry->new(
-    shortopt => "N",
-    description => "
-Number of vCPU sockets to use.  The default is to use the same as the
-physical machine.",
-  ),
-  "p2v.cpu.cores" => manual_entry->new(
-    shortopt => "N",
-    description => "
-Number of vCPU cores to use.  The default is to use the same as the
-physical machine.",
-  ),
-  "p2v.cpu.threads" => manual_entry->new(
-    shortopt => "N",
-    description => "
-Number of vCPU hyperthreads to use.  The default is to use the same
-as the physical machine.",
   ),
   "p2v.cpu.acpi" => manual_entry->new(
     shortopt => "", # ignored for booleans

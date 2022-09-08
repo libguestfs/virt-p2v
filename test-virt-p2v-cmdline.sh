@@ -26,7 +26,7 @@ out=test-virt-p2v-cmdline.out
 rm -f $out
 
 # The Linux kernel command line.
-$VG virt-p2v --cmdline='p2v.server=localhost p2v.port=123 p2v.username=user p2v.password=secret p2v.skip_test_connection p2v.name=test p2v.vcpus=4 p2v.memory=1G p2v.disks=sda,sdb,sdc p2v.removable=sdd p2v.interfaces=eth0,eth1 p2v.o=local p2v.oa=sparse p2v.oc=qemu:///session p2v.of=raw p2v.os=/var/tmp p2v.network=em1:wired,other p2v.dump_config_and_exit' > $out
+$VG virt-p2v --cmdline='p2v.server=localhost p2v.port=123 p2v.username=user p2v.password=secret p2v.skip_test_connection p2v.name=test p2v.vcpu.cores=4 p2v.memory=1G p2v.disks=sda,sdb,sdc p2v.removable=sdd p2v.interfaces=eth0,eth1 p2v.o=local p2v.oa=sparse p2v.oc=qemu:///session p2v.of=raw p2v.os=/var/tmp p2v.network=em1:wired,other p2v.dump_config_and_exit' > $out
 
 # For debugging purposes.
 cat $out
@@ -37,7 +37,8 @@ grep "^remote\.port.*123" $out
 grep "^auth\.username.*user" $out
 grep "^auth\.sudo.*false" $out
 grep "^guestname.*test" $out
-grep "^vcpus.*4" $out
+grep "^vcpu.phys_topo.*false" $out
+grep "^vcpu.cores.*4" $out
 grep "^memory.*"$((1024*1024*1024)) $out
 grep "^disks.*sda sdb sdc" $out
 grep "^removable.*sdd" $out

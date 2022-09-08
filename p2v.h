@@ -60,6 +60,12 @@ extern int feature_colours_option;
 extern int force_colour;
 
 /* cpuid.c */
+struct cpu_topo {
+  unsigned sockets;
+  unsigned cores;
+  unsigned threads;
+};
+extern void get_cpu_topology (struct cpu_topo *topo);
 extern void get_cpu_config (struct cpu_config *);
 
 /* rtc.c */

@@ -154,22 +154,32 @@ get_vendor (char **lscpu, struct cpu_config *cpu)
 }
 
 /**
- * Read the CPU topology from lscpu output.
+ * Read the CPU topology from a separate lscpu invocation.
  */
-static void
-get_topology (char **lscpu, struct cpu_config *cpu)
+void
+get_cpu_topology (struct cpu_topo *topo)
 {
-  const char *v;
 
-  v = get_field (lscpu, "Socket(s)");
-  if (v)
-    ignore_value (sscanf (v, "%u", &cpu->sockets));
-  v = get_field (lscpu, "Core(s) per socket");
-  if (v)
-    ignore_value (sscanf (v, "%u", &cpu->cores));
-  v = get_field (lscpu, "Thread(s) per core");
-  if (v)
-    ignore_value (sscanf (v, "%u", &cpu->threads));
+  CLEANUP_FREE_STRING_LIST char **lscpu = NULL;
+
+  lscpu = get_lscpu ();
+
+  if (lscpu != NULL) {
+    const char *sockets, *cores, *threads;
+
+    sockets = get_field (lscpu, "Socket(s)");
+    cores = get_field (lscpu, "Core(s) per socket");
+    threads = get_field (lscpu, "Thread(s) per core");
+    if (sockets && cores && threads) {
+      ignore_value (sscanf (sockets, "%u", &topo->sockets));
+      ignore_value (sscanf (cores, "%u", &topo->cores));
+      ignore_value (sscanf (threads, "%u", &topo->threads));
+      return;
+    }
+  }
+  topo->sockets = 1;
+  topo->cores = 1;
+  topo->threads = 1;
 }
 
 /**
@@ -211,7 +221,6 @@ get_cpu_config (struct cpu_config *cpu)
   lscpu = get_lscpu ();
   if (lscpu != NULL) {
     get_vendor (lscpu, cpu);
-    get_topology (lscpu, cpu);
     get_flags (lscpu, cpu);
   }
 

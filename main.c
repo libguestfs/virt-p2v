@@ -291,16 +291,18 @@ set_config_defaults (struct config *config)
   }
   config->guestname = strdup (hostname);
 
+  config->vcpu.phys_topo = false;
+
   /* Defaults for #vcpus and memory are taken from the physical machine. */
   i = sysconf (_SC_NPROCESSORS_ONLN);
   if (i == -1) {
     perror ("sysconf: _SC_NPROCESSORS_ONLN");
-    config->vcpus = 1;
+    config->vcpu.cores = 1;
   }
   else if (i == 0)
-    config->vcpus = 1;
+    config->vcpu.cores = 1;
   else
-    config->vcpus = i;
+    config->vcpu.cores = i;
 
   i = sysconf (_SC_PHYS_PAGES);
   if (i == -1) {
