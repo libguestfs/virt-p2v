@@ -38,7 +38,7 @@ AC_ARG_ENABLE([werror],
      gcc_warnings=$enableval],
      [gcc_warnings=no]
 )
-WARN_CFLAGS="-Wall"
+WARN_CFLAGS="-Wall -Wextra -Wshadow -Wno-unused-parameter"
 AC_SUBST([WARN_CFLAGS])
 if test "x$gcc_warnings" = "xyes"; then
     WERROR_CFLAGS="-Werror"
