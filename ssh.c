@@ -765,7 +765,7 @@ test_connection (struct config *config)
   /* Clear any previous version information since we may be connecting
    * to a different server.
    */
-  free (v2v_version);
+  pcre2_substring_free ((PCRE2_UCHAR *)v2v_version);
   v2v_version = NULL;
 
   /* Send 'virt-v2v --version' command and hope we get back a version string.
@@ -788,7 +788,7 @@ test_connection (struct config *config)
                            { 0 }
                          }, match_data)) {
     case 100:                   /* Got version string. */
-      free (v2v_version);
+      pcre2_substring_free ((PCRE2_UCHAR *)v2v_version);
       pcre2_substring_get_bynumber (match_data, 1,
                                     (PCRE2_UCHAR **) &v2v_version, &verlen);
 #if DEBUG_STDERR
