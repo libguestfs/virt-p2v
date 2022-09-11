@@ -680,12 +680,14 @@ connection_next_clicked (GtkWidget *w, gpointer data)
 /*----------------------------------------------------------------------*/
 /* Conversion dialog. */
 
-static void populate_disks (GtkTreeView *disks_list);
-static void populate_removable (GtkTreeView *removable_list);
-static void populate_interfaces (GtkTreeView *interfaces_list);
+static void populate_disks (GtkTreeView *disks_list_p);
+static void populate_removable (GtkTreeView *removable_list_p);
+static void populate_interfaces (GtkTreeView *interfaces_list_p);
 static void toggled (GtkCellRendererToggle *cell, gchar *path_str, gpointer data);
 static void network_edited_callback (GtkCellRendererToggle *cell, gchar *path_str, gchar *new_text, gpointer data);
-static gboolean maybe_identify_click (GtkWidget *interfaces_list, GdkEventButton *event, gpointer data);
+static gboolean maybe_identify_click (GtkWidget *interfaces_list_p,
+                                      GdkEventButton *event,
+                                      gpointer data);
 static void set_disks_from_ui (struct config *);
 static void set_removable_from_ui (struct config *);
 static void set_interfaces_from_ui (struct config *);
@@ -1093,7 +1095,7 @@ repopulate_output_combo (struct config *config)
  * Populate the C<Fixed hard disks> treeview.
  */
 static void
-populate_disks (GtkTreeView *disks_list)
+populate_disks (GtkTreeView *disks_list_p)
 {
   GtkListStore *disks_store;
   GtkCellRenderer *disks_col_convert, *disks_col_device;
@@ -1136,11 +1138,11 @@ populate_disks (GtkTreeView *disks_list)
                           -1);
     }
   }
-  gtk_tree_view_set_model (disks_list,
+  gtk_tree_view_set_model (disks_list_p,
                            GTK_TREE_MODEL (disks_store));
-  gtk_tree_view_set_headers_visible (disks_list, TRUE);
+  gtk_tree_view_set_headers_visible (disks_list_p, TRUE);
   disks_col_convert = gtk_cell_renderer_toggle_new ();
-  gtk_tree_view_insert_column_with_attributes (disks_list,
+  gtk_tree_view_insert_column_with_attributes (disks_list_p,
                                                -1,
                                                _("Convert"),
                                                disks_col_convert,
@@ -1148,7 +1150,7 @@ populate_disks (GtkTreeView *disks_list)
                                                NULL);
   gtk_cell_renderer_set_alignment (disks_col_convert, 0.5, 0.0);
   disks_col_device = gtk_cell_renderer_text_new ();
-  gtk_tree_view_insert_column_with_attributes (disks_list,
+  gtk_tree_view_insert_column_with_attributes (disks_list_p,
                                                -1,
                                                _("Device"),
                                                disks_col_device,
@@ -1164,7 +1166,7 @@ populate_disks (GtkTreeView *disks_list)
  * Populate the C<Removable media> treeview.
  */
 static void
-populate_removable (GtkTreeView *removable_list)
+populate_removable (GtkTreeView *removable_list_p)
 {
   GtkListStore *removable_store;
   GtkCellRenderer *removable_col_convert, *removable_col_device;
@@ -1187,11 +1189,11 @@ populate_removable (GtkTreeView *removable_list)
                           -1);
     }
   }
-  gtk_tree_view_set_model (removable_list,
+  gtk_tree_view_set_model (removable_list_p,
                            GTK_TREE_MODEL (removable_store));
-  gtk_tree_view_set_headers_visible (removable_list, TRUE);
+  gtk_tree_view_set_headers_visible (removable_list_p, TRUE);
   removable_col_convert = gtk_cell_renderer_toggle_new ();
-  gtk_tree_view_insert_column_with_attributes (removable_list,
+  gtk_tree_view_insert_column_with_attributes (removable_list_p,
                                                -1,
                                                _("Convert"),
                                                removable_col_convert,
@@ -1199,7 +1201,7 @@ populate_removable (GtkTreeView *removable_list)
                                                NULL);
   gtk_cell_renderer_set_alignment (removable_col_convert, 0.5, 0.0);
   removable_col_device = gtk_cell_renderer_text_new ();
-  gtk_tree_view_insert_column_with_attributes (removable_list,
+  gtk_tree_view_insert_column_with_attributes (removable_list_p,
                                                -1,
                                                _("Device"),
                                                removable_col_device,
@@ -1215,7 +1217,7 @@ populate_removable (GtkTreeView *removable_list)
  * Populate the C<Network interfaces> treeview.
  */
 static void
-populate_interfaces (GtkTreeView *interfaces_list)
+populate_interfaces (GtkTreeView *interfaces_list_p)
 {
   GtkListStore *interfaces_store;
   GtkCellRenderer *interfaces_col_convert, *interfaces_col_device,
@@ -1257,11 +1259,11 @@ populate_interfaces (GtkTreeView *interfaces_list)
                           -1);
     }
   }
-  gtk_tree_view_set_model (interfaces_list,
+  gtk_tree_view_set_model (interfaces_list_p,
                            GTK_TREE_MODEL (interfaces_store));
-  gtk_tree_view_set_headers_visible (interfaces_list, TRUE);
+  gtk_tree_view_set_headers_visible (interfaces_list_p, TRUE);
   interfaces_col_convert = gtk_cell_renderer_toggle_new ();
-  gtk_tree_view_insert_column_with_attributes (interfaces_list,
+  gtk_tree_view_insert_column_with_attributes (interfaces_list_p,
                                                -1,
                                                _("Convert"),
                                                interfaces_col_convert,
@@ -1269,7 +1271,7 @@ populate_interfaces (GtkTreeView *interfaces_list)
                                                NULL);
   gtk_cell_renderer_set_alignment (interfaces_col_convert, 0.5, 0.0);
   interfaces_col_device = gtk_cell_renderer_text_new ();
-  gtk_tree_view_insert_column_with_attributes (interfaces_list,
+  gtk_tree_view_insert_column_with_attributes (interfaces_list_p,
                                                -1,
                                                _("Device"),
                                                interfaces_col_device,
@@ -1277,7 +1279,7 @@ populate_interfaces (GtkTreeView *interfaces_list)
                                                NULL);
   gtk_cell_renderer_set_alignment (interfaces_col_device, 0.0, 0.0);
   interfaces_col_network = gtk_cell_renderer_text_new ();
-  gtk_tree_view_insert_column_with_attributes (interfaces_list,
+  gtk_tree_view_insert_column_with_attributes (interfaces_list_p,
                                                -1,
                                                _("Connect to virtual network"),
                                                interfaces_col_network,
@@ -1337,7 +1339,7 @@ network_edited_callback (GtkCellRendererToggle *cell, gchar *path_str,
  * L<https://en.wikibooks.org/wiki/GTK%2B_By_Example/Tree_View/Events>
  */
 static gboolean
-maybe_identify_click (GtkWidget *interfaces_list, GdkEventButton *event,
+maybe_identify_click (GtkWidget *interfaces_list_p, GdkEventButton *event,
                       gpointer data)
 {
   gboolean ret = FALSE;         /* Did we handle this event? */
@@ -1352,14 +1354,14 @@ maybe_identify_click (GtkWidget *interfaces_list, GdkEventButton *event,
     gdouble event_x, event_y;
 
     if (gdk_event_get_coords ((const GdkEvent *) event, &event_x, &event_y)
-        && gtk_tree_view_get_path_at_pos (GTK_TREE_VIEW (interfaces_list),
+        && gtk_tree_view_get_path_at_pos (GTK_TREE_VIEW (interfaces_list_p),
                                           event_x, event_y,
                                           &path, &column, NULL, NULL)) {
       GList *cols;
       gint column_index;
 
       /* Get column index. */
-      cols = gtk_tree_view_get_columns (GTK_TREE_VIEW (interfaces_list));
+      cols = gtk_tree_view_get_columns (GTK_TREE_VIEW (interfaces_list_p));
       column_index = g_list_index (cols, (gpointer) column);
       g_list_free (cols);
 

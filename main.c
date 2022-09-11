@@ -121,12 +121,13 @@ display_short_options (const char *format)
 }
 
 static void
-display_long_options (const struct option *long_options)
+display_long_options (const struct option *long_options_p)
 {
-  while (long_options->name) {
-    if (STRNEQ (long_options->name, "long-options") && STRNEQ (long_options->name, "short-options"))
-      printf ("--%s\n", long_options->name);
-    long_options++;
+  while (long_options_p->name) {
+    if (STRNEQ (long_options_p->name, "long-options") &&
+        STRNEQ (long_options_p->name, "short-options"))
+      printf ("--%s\n", long_options_p->name);
+    long_options_p++;
   }
   exit (EXIT_SUCCESS);
 }

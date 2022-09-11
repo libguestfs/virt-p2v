@@ -743,7 +743,7 @@ scp_file (struct config *config, const char *target, const char *local, ...)
 
 static void add_input_driver (const char *name);
 static void add_output_driver (const char *name);
-static int compatible_version (const char *v2v_version);
+static int compatible_version (const char *v2v_version_p);
 
 #if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic ignored "-Wsuggest-attribute=noreturn" /* WTF? */
@@ -1018,15 +1018,15 @@ add_output_driver (const char *name)
 }
 
 static int
-compatible_version (const char *v2v_version)
+compatible_version (const char *v2v_version_p)
 {
   unsigned v2v_major, v2v_minor;
 
   /* The major version must always be 1 or 2. */
-  if (!STRPREFIX (v2v_version, "1.") && !STRPREFIX (v2v_version, "2.")) {
+  if (!STRPREFIX (v2v_version_p, "1.") && !STRPREFIX (v2v_version_p, "2.")) {
     set_ssh_error ("virt-v2v major version is neither 1 nor 2 (\"%s\"), "
                    "this version of virt-p2v is not compatible.",
-                   v2v_version);
+                   v2v_version_p);
     return 0;
   }
 
@@ -1035,16 +1035,16 @@ compatible_version (const char *v2v_version)
    * that we published during development, nor (b) using old virt-v2v.
    * We should remain compatible with any virt-v2v after 1.28.
    */
-  if (sscanf (v2v_version, "%u.%u", &v2v_major, &v2v_minor) != 2) {
+  if (sscanf (v2v_version_p, "%u.%u", &v2v_major, &v2v_minor) != 2) {
     set_ssh_internal_error ("cannot parse virt-v2v version string (\"%s\")",
-                            v2v_version);
+                            v2v_version_p);
     return 0;
   }
 
   if (v2v_major == 1 && v2v_minor < 28) {
     set_ssh_error ("virt-v2v version is < 1.28 (\"%s\"), "
                    "you must upgrade to virt-v2v >= 1.28 on "
-                   "the conversion server.", v2v_version);
+                   "the conversion server.", v2v_version_p);
     return 0;
   }
 
