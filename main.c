@@ -131,6 +131,7 @@ main (int argc, char *argv[])
   int cmdline_source = 0;
   struct config *config = new_config ();
   const char *test_disk = NULL;
+  char **disks, **removable;
 
   setlocale (LC_ALL, "");
   bindtextdomain (PACKAGE, LOCALEBASEDIR);
@@ -219,18 +220,19 @@ main (int argc, char *argv[])
     /* For testing and debugging purposes, you can use
      * --test-disk=/path/to/disk.img
      */
-    all_disks = malloc (2 * sizeof (char *));
-    if (all_disks == NULL)
+    disks = malloc (2 * sizeof (char *));
+    if (disks == NULL)
       error (EXIT_FAILURE, errno, "malloc");
-    all_disks[0] = strdup (test_disk);
-    if (all_disks[0] == NULL)
+    disks[0] = strdup (test_disk);
+    if (disks[0] == NULL)
       error (EXIT_FAILURE, errno, "strdup");
-    all_disks[1] = NULL;
-  } else
-    find_all_disks ();
+    disks[1] = NULL;
 
-  set_config_defaults (config, (const char **)all_disks,
-                       (const char **)all_removable);
+    removable = NULL;
+  } else
+    find_all_disks (&disks, &removable);
+
+  set_config_defaults (config, (const char **)disks, (const char **)removable);
 
   /* Parse /proc/cmdline (if it exists) or use the --cmdline parameter
    * to initialize the configuration.  This allows defaults to be pass
@@ -256,11 +258,12 @@ main (int argc, char *argv[])
       error (EXIT_FAILURE, 0,
              _("gtk_init_check returned false, indicating that\n"
                "a GUI is not possible on this host.  Check X11, $DISPLAY etc."));
-    gui_conversion (config, (const char **)all_disks,
-                    (const char **)all_removable);
+    gui_conversion (config, (const char **)disks, (const char **)removable);
   }
 
   guestfs_int_free_string_list (cmdline);
+  guestfs_int_free_string_list (removable);
+  guestfs_int_free_string_list (disks);
   free_config (config);
 
   exit (EXIT_SUCCESS);

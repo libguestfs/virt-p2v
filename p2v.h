@@ -66,15 +66,8 @@ struct cpu_topo {
 extern void get_cpu_topology (struct cpu_topo *topo);
 extern void get_cpu_config (struct cpu_config *);
 
-/* disks.c
- *
- * All disks / removable media discovered (possibly with one call to
- * find_all_disks()) when the program started.  Do not change these, or call
- * find_all_disks() more than once.
- */
-extern char **all_disks;
-extern char **all_removable;
-extern void find_all_disks (void);
+/* disks.c */
+extern void find_all_disks (char ***disks, char ***removable);
 
 /* rtc.c */
 extern void get_rtc_config (struct rtc_config *);

@@ -36,9 +36,6 @@
 
 #include "p2v.h"
 
-char **all_disks;
-char **all_removable;
-
 /**
  * Get parent device of a partition.
  *
@@ -107,11 +104,11 @@ device_contains (const char *dev, dev_t root_device)
 }
 
 /**
- * Enumerate all disks in F</sys/block> and add them to the global
- * C<all_disks> and C<all_removable> arrays.
+ * Enumerate all disks in F</sys/block> and return them in the C<disks> and
+ * C<removable> arrays.
  */
 void
-find_all_disks (void)
+find_all_disks (char ***disks, char ***removable)
 {
   DIR *dir;
   struct dirent *d;
@@ -184,6 +181,6 @@ find_all_disks (void)
   if (ret_removable)
     qsort (ret_removable, nr_removable, sizeof (char *), compare_strings);
 
-  all_disks = ret_disks;
-  all_removable = ret_removable;
+  *disks = ret_disks;
+  *removable = ret_removable;
 }
