@@ -225,8 +225,9 @@ drives.  (Note that the button will also reset the currently active
 selections in both of those panels.)  This button is useful in
 combination with the C<XTerm> button on the L</SSH CONFIGURATION
 DIALOG>: in the XTerm window, you can expose further block devices to
-the kernel (such as LUNs from iSCSI targets), and the C<Refresh disks>
-button allows virt-p2v to learn about all the block devices again.
+the kernel (such as L<LUNs from iSCSI targets|/ACCESSING ISCSI
+DEVICES>), and the C<Refresh disks> button allows virt-p2v to learn
+about all the block devices again.
 
                                                        │
      Network interfaces                                │
@@ -447,6 +448,103 @@ sections:
 L<virt-p2v-make-disk(1)/ADDING AN SSH IDENTITY>
 
 L<virt-p2v-make-kickstart(1)/ADDING AN SSH IDENTITY>
+
+=head1 ACCESSING ISCSI DEVICES
+
+In case the disk that contains the operating system, or other disks that
+you want to convert, are LUNs of remote iSCSI targets, follow the steps
+below so that virt-p2v can learn about said disks.  Note that this
+procedure depends on the use of the GUI.
+
+The guide below is roughly based on the L<RHEL9 product
+documentation|https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html/managing_storage_devices/configuring-an-iscsi-initiator_managing-storage-devices>.
+
+=over 4
+
+=item 1.
+
+Open a shell in an XTerm window, using the C<XTerm> button of the L</SSH
+CONFIGURATION DIALOG>.
+
+(Note that the XTerm window(s) persist while you advance to further
+dialogs in virt-p2v, therefore it's unnecessary to jump back and forth
+between virt-p2v dialogs just for entering additional shell commands in
+the XTerm window(s).)
+
+=item 2.
+
+Using C<vi> or another text editor, set the iSCSI initiator name in
+F</etc/iscsi/initiatorname.iscsi>, for example:
+
+ InitiatorName=iqn.1994-05.com.redhat:846e82c634
+
+If the file does not exist, create it.  (Remember that this file is part
+of the virt-p2v Live environment, therefore saving it does not modify
+any hard disks.)
+
+=item 3.
+
+Configure any further iSCSI initiator details I<completely> that are
+required by the iSCSI target that you intend to log in to; that is,
+before you issue the first C<iscsiadm> command below.  This includes the
+CHAP user name and password if the target authenticates the initiator
+with CHAP, and the reverse direction CHAP user name and password too, if
+you want to ascertain the identity of the target on the initiator as
+well (this is called "mutual authentication").
+
+Completing the configuration at this stage is important because the
+first C<iscsiadm> command will start up the C<iscsid> service, and
+configuration changes with that service already running will not (or may
+not) take effect until/unless you restart the service using
+C<systemctl>.
+
+=item 4.
+
+Discover the iSCSI targets offered by the desired host:
+
+ iscsiadm -m discovery -t st -p IP_ADDRESS
+
+The command should respond with a two-column list of targets.  The
+symbolic target names are in the right hand side column, for example:
+
+     10.64.24.179:3260,1 iqn.2006-04.example:444
+
+=item 5.
+
+Picking an appropriate target from the right hand side column of the
+previous step's output, log in to the target:
+
+ iscsiadm -m node -T TARGET -l
+
+This command will inform you whether the login attempt was successful.
+
+=item 6.
+
+In case the login succeeds, a scan for LUNs on the iSCSI target will
+commence at once.  There are two pitfalls here.  One, dependent on
+network characteristics, the scan may take several (tens of) seconds.
+Two, even if the login succeeds, ACLs on the target may I<silently>
+prevent the initiator from seeing particular LUNs -- meaning that no new
+F</dev/sdX> nodes will appear.  This is why it is important to get the
+initiator name (and, potentially, CHAP authentication) correct at the
+very beginning of this procedure.
+
+Verify the results of the target scan with the C<dmesg> command, and/or
+with
+
+ ls -l /dev/disk/by-path/ip-*-iscsi-*-lun-*
+
+If these symlinks exist, containing the C<IP_ADDRESS> from step 4 and
+the C<TARGET> name from step 5 in their filenames, then the target scan
+has successfully found the corresponding LUNs.
+
+=item 7.
+
+Once the remote LUNs have been successfully enumerated, click the
+C<Refresh disks> button in the L</DISK AND NETWORK CONFIGURATION
+DIALOG>.
+
+=back
 
 =head1 COMMON PROBLEMS
 
