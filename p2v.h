@@ -128,6 +128,7 @@ extern char *get_blockdev_serial (const char *dev);
 extern char *get_if_addr (const char *if_name);
 extern char *get_if_vendor (const char *if_name, int truncate);
 extern void wait_network_online (const struct config *);
+extern int compare_strings (const void *vp1, const void *vp2);
 
 /* virt-v2v version and features (read from remote). */
 extern char *v2v_version;

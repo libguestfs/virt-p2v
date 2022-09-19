@@ -253,3 +253,11 @@ wait_network_online (const struct config *config)
 
   ignore_value (system (NETWORK_ONLINE_COMMAND));
 }
+
+int
+compare_strings (const void *vp1, const void *vp2)
+{
+  char * const *p1 = (char * const *) vp1;
+  char * const *p2 = (char * const *) vp2;
+  return strcmp (*p1, *p2);
+}

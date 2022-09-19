@@ -372,14 +372,6 @@ set_config_defaults (struct config *config)
   config->output.storage = strdup ("/var/tmp");
 }
 
-static int
-compare (const void *vp1, const void *vp2)
-{
-  char * const *p1 = (char * const *) vp1;
-  char * const *p2 = (char * const *) vp2;
-  return strcmp (*p1, *p2);
-}
-
 /**
  * Get parent device of a partition.
  *
@@ -520,9 +512,9 @@ find_all_disks (void)
     error (EXIT_FAILURE, errno, "closedir: %s", "/sys/block");
 
   if (all_disks)
-    qsort (all_disks, nr_disks, sizeof (char *), compare);
+    qsort (all_disks, nr_disks, sizeof (char *), compare_strings);
   if (all_removable)
-    qsort (all_removable, nr_removable, sizeof (char *), compare);
+    qsort (all_removable, nr_removable, sizeof (char *), compare_strings);
 }
 
 /**
@@ -576,5 +568,5 @@ find_all_interfaces (void)
     error (EXIT_FAILURE, errno, "closedir: %s", "/sys/class/net");
 
   if (all_interfaces)
-    qsort (all_interfaces, nr_interfaces, sizeof (char *), compare);
+    qsort (all_interfaces, nr_interfaces, sizeof (char *), compare_strings);
 }
