@@ -46,10 +46,11 @@ char **all_interfaces;
 int is_iso_environment = 0;
 int feature_colours_option = 0;
 int force_colour = 0;
-static const char *test_disk = NULL;
 
 static void udevadm_settle (void);
-static void set_config_defaults (struct config *config);
+static void set_config_defaults (struct config *config,
+                                 const char * const *disks,
+                                 const char * const *removable);
 static void find_all_interfaces (void);
 
 enum { HELP_OPTION = CHAR_MAX + 1 };
@@ -129,6 +130,7 @@ main (int argc, char *argv[])
   char **cmdline = NULL;
   int cmdline_source = 0;
   struct config *config = new_config ();
+  const char *test_disk = NULL;
 
   setlocale (LC_ALL, "");
   bindtextdomain (PACKAGE, LOCALEBASEDIR);
@@ -212,7 +214,23 @@ main (int argc, char *argv[])
 
   test_nbd_server ();
 
-  set_config_defaults (config);
+  /* Find all block devices in the system. */
+  if (test_disk) {
+    /* For testing and debugging purposes, you can use
+     * --test-disk=/path/to/disk.img
+     */
+    all_disks = malloc (2 * sizeof (char *));
+    if (all_disks == NULL)
+      error (EXIT_FAILURE, errno, "malloc");
+    all_disks[0] = strdup (test_disk);
+    if (all_disks[0] == NULL)
+      error (EXIT_FAILURE, errno, "strdup");
+    all_disks[1] = NULL;
+  } else
+    find_all_disks ();
+
+  set_config_defaults (config, (const char **)all_disks,
+                       (const char **)all_removable);
 
   /* Parse /proc/cmdline (if it exists) or use the --cmdline parameter
    * to initialize the configuration.  This allows defaults to be pass
@@ -254,7 +272,9 @@ udevadm_settle (void)
 }
 
 static void
-set_config_defaults (struct config *config)
+set_config_defaults (struct config *config,
+                     const char * const *disks,
+                     const char * const *removable)
 {
   long i;
   char hostname[257];
@@ -326,27 +346,10 @@ set_config_defaults (struct config *config)
   get_cpu_config (&config->cpu);
   get_rtc_config (&config->rtc);
 
-  /* Find all block devices in the system. */
-  if (test_disk) {
-    /* For testing and debugging purposes, you can use
-     * --test-disk=/path/to/disk.img
-     */
-    all_disks = malloc (2 * sizeof (char *));
-    if (all_disks == NULL)
-      error (EXIT_FAILURE, errno, "malloc");
-    all_disks[0] = strdup (test_disk);
-    if (all_disks[0] == NULL)
-      error (EXIT_FAILURE, errno, "strdup");
-    all_disks[1] = NULL;
-  } else
-    find_all_disks ();
-
-  if (all_disks)
-    config->disks = guestfs_int_copy_string_list (all_disks);
-
-  /* Find all removable devices in the system. */
-  if (all_removable)
-    config->removable = guestfs_int_copy_string_list (all_removable);
+  if (disks)
+    config->disks = guestfs_int_copy_string_list ((char **)disks);
+  if (removable)
+    config->removable = guestfs_int_copy_string_list ((char **)removable);
 
   /* Find all network interfaces in the system. */
   find_all_interfaces ();
