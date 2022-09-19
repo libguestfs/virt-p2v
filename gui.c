@@ -1404,15 +1404,14 @@ set_from_ui_generic (char **all, char ***ret, GtkTreeView *list)
   gboolean b, v;
   size_t i, j;
 
+  guestfs_int_free_string_list (*ret);
   if (all == NULL) {
-    guestfs_int_free_string_list (*ret);
     *ret = NULL;
     return;
   }
 
   model = gtk_tree_view_get_model (list);
 
-  guestfs_int_free_string_list (*ret);
   *ret = malloc ((1 + guestfs_int_count_strings (all)) * sizeof (char *));
   if (*ret == NULL)
     error (EXIT_FAILURE, errno, "malloc");
