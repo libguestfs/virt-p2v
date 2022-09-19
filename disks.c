@@ -116,6 +116,7 @@ find_all_disks (void)
   DIR *dir;
   struct dirent *d;
   size_t nr_disks = 0, nr_removable = 0;
+  char **ret_disks = NULL, **ret_removable = NULL;
   dev_t root_device = 0;
   struct stat statbuf;
 
@@ -147,26 +148,26 @@ find_all_disks (void)
         continue;
 
       nr_disks++;
-      all_disks = realloc (all_disks, sizeof (char *) * (nr_disks + 1));
-      if (!all_disks)
+      ret_disks = realloc (ret_disks, sizeof (char *) * (nr_disks + 1));
+      if (!ret_disks)
         error (EXIT_FAILURE, errno, "realloc");
 
-      all_disks[nr_disks-1] = strdup (d->d_name);
+      ret_disks[nr_disks-1] = strdup (d->d_name);
 
       /* cciss device /dev/cciss/c0d0 will be /sys/block/cciss!c0d0 */
-      p = strchr (all_disks[nr_disks-1], '!');
+      p = strchr (ret_disks[nr_disks-1], '!');
       if (p) *p = '/';
 
-      all_disks[nr_disks] = NULL;
+      ret_disks[nr_disks] = NULL;
     }
     else if (STRPREFIX (d->d_name, "sr")) {
       nr_removable++;
-      all_removable = realloc (all_removable,
+      ret_removable = realloc (ret_removable,
                                sizeof (char *) * (nr_removable + 1));
-      if (!all_removable)
+      if (!ret_removable)
         error (EXIT_FAILURE, errno, "realloc");
-      all_removable[nr_removable-1] = strdup (d->d_name);
-      all_removable[nr_removable] = NULL;
+      ret_removable[nr_removable-1] = strdup (d->d_name);
+      ret_removable[nr_removable] = NULL;
     }
   }
 
@@ -178,8 +179,11 @@ find_all_disks (void)
   if (closedir (dir) == -1)
     error (EXIT_FAILURE, errno, "closedir: %s", "/sys/block");
 
-  if (all_disks)
-    qsort (all_disks, nr_disks, sizeof (char *), compare_strings);
-  if (all_removable)
-    qsort (all_removable, nr_removable, sizeof (char *), compare_strings);
+  if (ret_disks)
+    qsort (ret_disks, nr_disks, sizeof (char *), compare_strings);
+  if (ret_removable)
+    qsort (ret_removable, nr_removable, sizeof (char *), compare_strings);
+
+  all_disks = ret_disks;
+  all_removable = ret_removable;
 }
