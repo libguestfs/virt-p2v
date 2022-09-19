@@ -127,8 +127,7 @@ static GtkWidget *conv_dlg,
   *vcpus_warning, *memory_warning, *target_warning_label,
   *o_combo, *oc_entry, *os_entry, *of_entry, *oa_combo,
   *info_label,
-  *disks_list, *removable_list, *interfaces_list,
-  *start_button;
+  *disks_list, *removable_list, *interfaces_list;
 static int vcpus_entry_when_last_sensitive;
 
 /* The running dialog which is displayed when virt-v2v is running. */
@@ -742,7 +741,7 @@ create_conversion_dialog (struct config *config,
                           const char * const *disks,
                           const char * const *removable)
 {
-  GtkWidget *back;
+  GtkWidget *back, *start_button;
   GtkWidget *hbox, *left_vbox, *right_vbox;
   GtkWidget *target_frame, *target_vbox, *target_tbl;
   GtkWidget *guestname_label, *vcpus_label, *memory_label;
