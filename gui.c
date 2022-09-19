@@ -684,8 +684,12 @@ connection_next_clicked (GtkWidget *w, gpointer data)
 /*----------------------------------------------------------------------*/
 /* Conversion dialog. */
 
+static void populate_disks_store (GtkListStore *disks_store,
+                                  const char * const *disks);
 static void populate_disks (GtkTreeView *disks_list_p,
                             const char * const *disks);
+static void populate_removable_store (GtkListStore *removable_store,
+                                      const char * const *removable);
 static void populate_removable (GtkTreeView *removable_list_p,
                                 const char * const *removable);
 static void populate_interfaces (GtkTreeView *interfaces_list_p);
@@ -1105,51 +1109,59 @@ repopulate_output_combo (struct config *config)
  * Populate the C<Fixed hard disks> treeview.
  */
 static void
+populate_disks_store (GtkListStore *disks_store, const char * const *disks)
+{
+  size_t i;
+
+  if (disks == NULL)
+    return;
+
+  for (i = 0; disks[i] != NULL; ++i) {
+    uint64_t size;
+    CLEANUP_FREE char *size_gb = NULL;
+    CLEANUP_FREE char *model = NULL;
+    CLEANUP_FREE char *serial = NULL;
+    CLEANUP_FREE char *device_descr = NULL;
+    GtkTreeIter iter;
+
+    if (disks[i][0] != '/') { /* not using --test-disk */
+      size = get_blockdev_size (disks[i]);
+      if (asprintf (&size_gb, "%" PRIu64 "G", size) == -1)
+        error (EXIT_FAILURE, errno, "asprintf");
+      model = get_blockdev_model (disks[i]);
+      serial = get_blockdev_serial (disks[i]);
+    }
+
+    if (asprintf (&device_descr,
+                  "<b>%s</b>\n"
+                  "<small>"
+                  "%s %s\n"
+                  "%s%s"
+                  "</small>",
+                  disks[i],
+                  size_gb ? size_gb : "", model ? model : "",
+                  serial ? "s/n " : "", serial ? serial : "") == -1)
+      error (EXIT_FAILURE, errno, "asprintf");
+
+    gtk_list_store_append (disks_store, &iter);
+    gtk_list_store_set (disks_store, &iter,
+                        DISKS_COL_CONVERT, TRUE,
+                        DISKS_COL_HW_NAME, disks[i],
+                        DISKS_COL_DEVICE, device_descr,
+                        -1);
+  }
+}
+
+static void
 populate_disks (GtkTreeView *disks_list_p, const char * const *disks)
 {
   GtkListStore *disks_store;
   GtkCellRenderer *disks_col_convert, *disks_col_device;
-  GtkTreeIter iter;
-  size_t i;
 
   disks_store = gtk_list_store_new (NUM_DISKS_COLS,
                                     G_TYPE_BOOLEAN, G_TYPE_STRING,
                                     G_TYPE_STRING);
-  if (disks != NULL) {
-    for (i = 0; disks[i] != NULL; ++i) {
-      uint64_t size;
-      CLEANUP_FREE char *size_gb = NULL;
-      CLEANUP_FREE char *model = NULL;
-      CLEANUP_FREE char *serial = NULL;
-      CLEANUP_FREE char *device_descr = NULL;
-
-      if (disks[i][0] != '/') { /* not using --test-disk */
-        size = get_blockdev_size (disks[i]);
-        if (asprintf (&size_gb, "%" PRIu64 "G", size) == -1)
-          error (EXIT_FAILURE, errno, "asprintf");
-        model = get_blockdev_model (disks[i]);
-        serial = get_blockdev_serial (disks[i]);
-      }
-
-      if (asprintf (&device_descr,
-                    "<b>%s</b>\n"
-                    "<small>"
-                    "%s %s\n"
-                    "%s%s"
-                    "</small>",
-                    disks[i],
-                    size_gb ? size_gb : "", model ? model : "",
-                    serial ? "s/n " : "", serial ? serial : "") == -1)
-        error (EXIT_FAILURE, errno, "asprintf");
-
-      gtk_list_store_append (disks_store, &iter);
-      gtk_list_store_set (disks_store, &iter,
-                          DISKS_COL_CONVERT, TRUE,
-                          DISKS_COL_HW_NAME, disks[i],
-                          DISKS_COL_DEVICE, device_descr,
-                          -1);
-    }
-  }
+  populate_disks_store (disks_store, disks);
   gtk_tree_view_set_model (disks_list_p,
                            GTK_TREE_MODEL (disks_store));
   gtk_tree_view_set_headers_visible (disks_list_p, TRUE);
@@ -1178,32 +1190,41 @@ populate_disks (GtkTreeView *disks_list_p, const char * const *disks)
  * Populate the C<Removable media> treeview.
  */
 static void
+populate_removable_store (GtkListStore *removable_store,
+                          const char * const *removable)
+{
+  size_t i;
+
+  if (removable == NULL)
+    return;
+
+  for (i = 0; removable[i] != NULL; ++i) {
+    CLEANUP_FREE char *device_descr = NULL;
+    GtkTreeIter iter;
+
+    if (asprintf (&device_descr, "<b>%s</b>\n", removable[i]) == -1)
+      error (EXIT_FAILURE, errno, "asprintf");
+
+    gtk_list_store_append (removable_store, &iter);
+    gtk_list_store_set (removable_store, &iter,
+                        REMOVABLE_COL_CONVERT, TRUE,
+                        REMOVABLE_COL_HW_NAME, removable[i],
+                        REMOVABLE_COL_DEVICE, device_descr,
+                        -1);
+  }
+}
+
+static void
 populate_removable (GtkTreeView *removable_list_p,
                     const char * const *removable)
 {
   GtkListStore *removable_store;
   GtkCellRenderer *removable_col_convert, *removable_col_device;
-  GtkTreeIter iter;
-  size_t i;
 
   removable_store = gtk_list_store_new (NUM_REMOVABLE_COLS,
                                         G_TYPE_BOOLEAN, G_TYPE_STRING,
                                         G_TYPE_STRING);
-  if (removable != NULL) {
-    for (i = 0; removable[i] != NULL; ++i) {
-      CLEANUP_FREE char *device_descr = NULL;
-
-      if (asprintf (&device_descr, "<b>%s</b>\n", removable[i]) == -1)
-        error (EXIT_FAILURE, errno, "asprintf");
-
-      gtk_list_store_append (removable_store, &iter);
-      gtk_list_store_set (removable_store, &iter,
-                          REMOVABLE_COL_CONVERT, TRUE,
-                          REMOVABLE_COL_HW_NAME, removable[i],
-                          REMOVABLE_COL_DEVICE, device_descr,
-                          -1);
-    }
-  }
+  populate_removable_store (removable_store, removable);
   gtk_tree_view_set_model (removable_list_p,
                            GTK_TREE_MODEL (removable_store));
   gtk_tree_view_set_headers_visible (removable_list_p, TRUE);
