@@ -189,17 +189,17 @@ disks, removable media devices, and network interfaces, will be
 created in the output guest.  Normally leaving these at the default
 settings is fine.
 
- ─ ─ ───────────────────────────────────────┐
-     Fixed hard disks                       │
-                                            │
-     Convert  Device                        │
-     [✔]      sda                           │
-              1024G HITACHI                 │
-              s/n 12345                     │
-     [✔]      sdb                           │
-              119G HITACHI                  │
-              s/n 12346                     │
-                                            │
+ ─ ─ ──────────────────────────────────────────────────┐
+     Fixed hard disks                                  │
+                                                       │
+     Convert  Device                                   │
+     [✔]      sda                                      │
+              1024G HITACHI                            │
+              s/n 12345                                │
+     [✔]      sdb                                      │
+              119G HITACHI                             │
+              s/n 12346                                │
+                                                       │
 
 Normally you would want to convert all hard disks.  If you want
 virt-p2v to completely ignore a local hard disk, uncheck it.  The hard
@@ -207,25 +207,34 @@ disk that contains the operating system must be selected.  If a hard
 disk is part of a RAID array or LVM volume group (VG), then either all
 hard disks in that array/VG must be selected, or none of them.
 
-                                            │
-     Removable media                        │
-                                            │
-     Convert  Device                        │
-     [✔]      sr0                           │
-                                            │
+                                                       │
+     Removable media                                   │
+                                                       │
+     Convert  Device                                   │
+     [✔]      sr0                                      │
+                                                       │
 
 If the physical machine has CD or DVD drives, then you can use the
 Removable media panel to create corresponding drives on the guest
 after conversion.  Note that any data CDs/DVDs which are mounted in
 the drives are I<not> copied over.
 
-                                            │
-     Network interfaces                     │
-                                            │
-     Convert  Device Connect to ...         |
-     [✔]      em1    [default_____________] │
-     [ ]      wlp3s0 [default_____________] │
-                                            │
+At the bottom of the dialog, the C<Refresh disks> button instructs
+virt-p2v to re-enumerate the fixed hard disks and the removable media
+drives.  (Note that the button will also reset the currently active
+selections in both of those panels.)  This button is useful in
+combination with the C<XTerm> button on the L</SSH CONFIGURATION
+DIALOG>: in the XTerm window, you can expose further block devices to
+the kernel (such as LUNs from iSCSI targets), and the C<Refresh disks>
+button allows virt-p2v to learn about all the block devices again.
+
+                                                       │
+     Network interfaces                                │
+                                                       │
+     Convert  Device Connect to virtual network        │
+     [✔]      em1    [default________________________] │
+     [ ]      wlp3s0 [default________________________] │
+                                                       │
 
 In the Network interfaces panel, select the network interfaces that
 should be created in the guest after conversion.  You can also connect
@@ -239,10 +248,10 @@ the interface to be identified by the operator.
 When you are ready to begin the conversion, press the
 C<Start conversion> button:
 
-                                            │
-             [ Back ]  [ Start conversion ] │
-                                            │
- ─ ─ ───────────────────────────────────────┘
+                                                       │
+     [ Back ]  [ Refresh disks ]  [ Start conversion ] │
+                                                       │
+ ─ ─ ──────────────────────────────────────────────────┘
 
 =head2 CONVERSION RUNNING DIALOG
 
@@ -509,7 +518,9 @@ features such as the Shutdown popup button.
 =item B<--test-disk=/PATH/TO/DISK.IMG>
 
 For testing or debugging purposes, replace F</dev/sda> with a local
-file.  You must use an absolute path.
+file.  You must use an absolute path.  Note that the C<Refresh disks>
+button will be disabled in the L</DISK AND NETWORK CONFIGURATION DIALOG>
+of the GUI.
 
 =item B<-v>
 

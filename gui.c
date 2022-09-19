@@ -701,6 +701,7 @@ static void set_disks_from_ui (struct config *);
 static void set_removable_from_ui (struct config *);
 static void set_interfaces_from_ui (struct config *);
 static void conversion_back_clicked (GtkWidget *w, gpointer data);
+static void refresh_disks_clicked (GtkWidget *w, gpointer data);
 static void start_conversion_clicked (GtkWidget *w, gpointer data);
 static void vcpu_topo_toggled (GtkWidget *w, gpointer data);
 static void vcpus_or_memory_check_callback (GtkWidget *w, gpointer data);
@@ -741,7 +742,7 @@ create_conversion_dialog (struct config *config,
                           const char * const *disks,
                           const char * const *removable)
 {
-  GtkWidget *back, *start_button;
+  GtkWidget *back, *refresh_disks, *start_button;
   GtkWidget *hbox, *left_vbox, *right_vbox;
   GtkWidget *target_frame, *target_vbox, *target_tbl;
   GtkWidget *guestname_label, *vcpus_label, *memory_label;
@@ -984,16 +985,27 @@ create_conversion_dialog (struct config *config,
   /* Buttons. */
   gtk_dialog_add_buttons (GTK_DIALOG (conv_dlg),
                           _("_Back"), 1,
-                          _("Start _conversion"), 2,
+                          _("_Refresh disks (will reset selection)"), 2,
+                          _("Start _conversion"), 3,
                           NULL);
   back = gtk_dialog_get_widget_for_response (GTK_DIALOG (conv_dlg), 1);
-  start_button = gtk_dialog_get_widget_for_response (GTK_DIALOG (conv_dlg), 2);
+  refresh_disks = gtk_dialog_get_widget_for_response (GTK_DIALOG (conv_dlg), 2);
+  start_button = gtk_dialog_get_widget_for_response (GTK_DIALOG (conv_dlg), 3);
+
+  /* Disable disk refreshing in case --test-disk was passed. */
+  if (disks != NULL &&
+      disks[0] != NULL &&
+      disks[0][0] == '/' &&
+      disks[1] == NULL)
+    gtk_widget_set_sensitive (refresh_disks, FALSE);
 
   /* Signals. */
   g_signal_connect_swapped (G_OBJECT (conv_dlg), "destroy",
                             G_CALLBACK (gtk_main_quit), NULL);
   g_signal_connect (G_OBJECT (back), "clicked",
                     G_CALLBACK (conversion_back_clicked), NULL);
+  g_signal_connect (G_OBJECT (refresh_disks), "clicked",
+                    G_CALLBACK (refresh_disks_clicked), NULL);
   g_signal_connect (G_OBJECT (start_button), "clicked",
                     G_CALLBACK (start_conversion_clicked), config);
   g_signal_connect (G_OBJECT (vcpu_topo), "toggled",
@@ -1598,6 +1610,30 @@ conversion_back_clicked (GtkWidget *w, gpointer data)
    * do "Test connection" again.
    */
   gtk_widget_set_sensitive (next_button, FALSE);
+}
+
+static void
+refresh_disks_clicked (GtkWidget *w, gpointer data)
+{
+  GtkTreeModel *model;
+  GtkListStore *disks_store, *removable_store;
+  char **disks, **removable;
+
+  model = gtk_tree_view_get_model (GTK_TREE_VIEW (disks_list));
+  disks_store = GTK_LIST_STORE (model);
+
+  model = gtk_tree_view_get_model (GTK_TREE_VIEW (removable_list));
+  removable_store = GTK_LIST_STORE (model);
+
+  gtk_list_store_clear (disks_store);
+  gtk_list_store_clear (removable_store);
+
+  find_all_disks (&disks, &removable);
+  populate_disks_store (disks_store, (const char **)disks);
+  populate_removable_store (removable_store, (const char **)removable);
+
+  guestfs_int_free_string_list (removable);
+  guestfs_int_free_string_list (disks);
 }
 
 static char *concat_warning (char *warning, const char *fs, ...)
