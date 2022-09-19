@@ -108,6 +108,7 @@ virt_p2v_SOURCES = \
 	libguestfs/libxml2-writer-macros.h \
 	conversion.c \
 	cpuid.c \
+	disks.c \
 	gui.c \
 	gui-gtk2-compat.h \
 	gui-gtk3-compat.h \

@@ -40,11 +40,9 @@
 # define P2V_GCC_VERSION 0
 #endif
 
-/* All disks / removable media / network interfaces discovered
- * when the program started.  Do not change these.
+/* All network interfaces discovered when the program started.  Do not change
+ * this.
  */
-extern char **all_disks;
-extern char **all_removable;
 extern char **all_interfaces;
 
 /* True if running inside the virt-p2v ISO environment.  Various
@@ -67,6 +65,16 @@ struct cpu_topo {
 };
 extern void get_cpu_topology (struct cpu_topo *topo);
 extern void get_cpu_config (struct cpu_config *);
+
+/* disks.c
+ *
+ * All disks / removable media discovered (possibly with one call to
+ * find_all_disks()) when the program started.  Do not change these, or call
+ * find_all_disks() more than once.
+ */
+extern char **all_disks;
+extern char **all_removable;
+extern void find_all_disks (void);
 
 /* rtc.c */
 extern void get_rtc_config (struct rtc_config *);
