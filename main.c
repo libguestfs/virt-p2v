@@ -327,20 +327,20 @@ set_config_defaults (struct config *config)
   get_rtc_config (&config->rtc);
 
   /* Find all block devices in the system. */
-  if (!test_disk)
-    find_all_disks ();
-  else {
+  if (test_disk) {
     /* For testing and debugging purposes, you can use
      * --test-disk=/path/to/disk.img
      */
     all_disks = malloc (2 * sizeof (char *));
     if (all_disks == NULL)
-      error (EXIT_FAILURE, errno, "realloc");
+      error (EXIT_FAILURE, errno, "malloc");
     all_disks[0] = strdup (test_disk);
     if (all_disks[0] == NULL)
       error (EXIT_FAILURE, errno, "strdup");
     all_disks[1] = NULL;
-  }
+  } else
+    find_all_disks ();
+
   if (all_disks)
     config->disks = guestfs_int_copy_string_list (all_disks);
 
