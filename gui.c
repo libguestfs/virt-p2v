@@ -1448,8 +1448,38 @@ set_removable_from_ui (struct config *config)
 static void
 set_interfaces_from_ui (struct config *config)
 {
-  set_from_ui_generic (all_interfaces, &config->interfaces,
-                       GTK_TREE_VIEW (interfaces_list));
+  GtkTreeModel *model;
+  GtkTreeIter iter;
+  gboolean b, v;
+  size_t i, j;
+
+  guestfs_int_free_string_list (config->interfaces);
+  if (all_interfaces == NULL) {
+    config->interfaces = NULL;
+    return;
+  }
+
+  model = gtk_tree_view_get_model (GTK_TREE_VIEW (interfaces_list));
+
+  config->interfaces = malloc ((1 +
+                                guestfs_int_count_strings (all_interfaces)) *
+                               sizeof (char *));
+  if (config->interfaces == NULL)
+    error (EXIT_FAILURE, errno, "malloc");
+  i = j = 0;
+
+  b = gtk_tree_model_get_iter_first (model, &iter);
+  while (b) {
+    gtk_tree_model_get (model, &iter, INTERFACES_COL_CONVERT, &v, -1);
+    if (v) {
+      assert (all_interfaces[i] != NULL);
+      config->interfaces[j++] = strdup (all_interfaces[i]);
+    }
+    b = gtk_tree_model_iter_next (model, &iter);
+    ++i;
+  }
+
+  config->interfaces[j] = NULL;
 }
 
 static void
