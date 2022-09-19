@@ -702,12 +702,14 @@ static uint64_t get_memory_from_conv_dlg (void);
 
 enum {
   DISKS_COL_CONVERT = 0,
+  DISKS_COL_HW_NAME,
   DISKS_COL_DEVICE,
   NUM_DISKS_COLS,
 };
 
 enum {
   REMOVABLE_COL_CONVERT = 0,
+  REMOVABLE_COL_HW_NAME,
   REMOVABLE_COL_DEVICE,
   NUM_REMOVABLE_COLS,
 };
@@ -1103,7 +1105,8 @@ populate_disks (GtkTreeView *disks_list_p)
   size_t i;
 
   disks_store = gtk_list_store_new (NUM_DISKS_COLS,
-                                    G_TYPE_BOOLEAN, G_TYPE_STRING);
+                                    G_TYPE_BOOLEAN, G_TYPE_STRING,
+                                    G_TYPE_STRING);
   if (all_disks != NULL) {
     for (i = 0; all_disks[i] != NULL; ++i) {
       uint64_t size;
@@ -1134,6 +1137,7 @@ populate_disks (GtkTreeView *disks_list_p)
       gtk_list_store_append (disks_store, &iter);
       gtk_list_store_set (disks_store, &iter,
                           DISKS_COL_CONVERT, TRUE,
+                          DISKS_COL_HW_NAME, all_disks[i],
                           DISKS_COL_DEVICE, device_descr,
                           -1);
     }
@@ -1174,7 +1178,8 @@ populate_removable (GtkTreeView *removable_list_p)
   size_t i;
 
   removable_store = gtk_list_store_new (NUM_REMOVABLE_COLS,
-                                        G_TYPE_BOOLEAN, G_TYPE_STRING);
+                                        G_TYPE_BOOLEAN, G_TYPE_STRING,
+                                        G_TYPE_STRING);
   if (all_removable != NULL) {
     for (i = 0; all_removable[i] != NULL; ++i) {
       CLEANUP_FREE char *device_descr = NULL;
@@ -1185,6 +1190,7 @@ populate_removable (GtkTreeView *removable_list_p)
       gtk_list_store_append (removable_store, &iter);
       gtk_list_store_set (removable_store, &iter,
                           REMOVABLE_COL_CONVERT, TRUE,
+                          REMOVABLE_COL_HW_NAME, all_removable[i],
                           REMOVABLE_COL_DEVICE, device_descr,
                           -1);
     }
@@ -1397,52 +1403,76 @@ maybe_identify_click (GtkWidget *interfaces_list_p, GdkEventButton *event,
 }
 
 static void
-set_from_ui_generic (char **all, char ***ret, GtkTreeView *list)
+set_from_ui_generic (char ***ret, GtkTreeView *list)
 {
   GtkTreeModel *model;
-  GtkTreeIter iter;
-  gboolean b, v;
-  size_t i, j;
+  enum { COUNT, COPY, DONE } mode;
 
   guestfs_int_free_string_list (*ret);
-  if (all == NULL) {
-    *ret = NULL;
-    return;
-  }
+  *ret = NULL;
 
   model = gtk_tree_view_get_model (list);
 
-  *ret = malloc ((1 + guestfs_int_count_strings (all)) * sizeof (char *));
-  if (*ret == NULL)
-    error (EXIT_FAILURE, errno, "malloc");
-  i = j = 0;
+  for (mode = COUNT; mode != DONE; mode++) {
+    size_t found;
+    gboolean avail;
+    GtkTreeIter iter;
 
-  b = gtk_tree_model_get_iter_first (model, &iter);
-  while (b) {
-    gtk_tree_model_get (model, &iter, 0 /* CONVERT */, &v, -1);
-    if (v) {
-      assert (all[i] != NULL);
-      (*ret)[j++] = strdup (all[i]);
+    found = 0;
+    avail = gtk_tree_model_get_iter_first (model, &iter);
+    while (avail) {
+      gboolean active;
+
+      gtk_tree_model_get (model, &iter, 0 /* CONVERT */, &active, -1);
+      if (active) {
+        if (mode == COPY) {
+          gchar *hw_name;
+
+          gtk_tree_model_get (model, &iter, 1 /* HW_NAME */, &hw_name, -1);
+
+          /* gtk_tree_model_get() outputs a deep copy, so no need for an
+           * strdup() here
+           */
+          (*ret)[found] = hw_name;
+        }
+
+        found++;
+      }
+
+      avail = gtk_tree_model_iter_next (model, &iter);
+    } /* iteration over entries of "model" */
+
+    switch (mode) {
+    case COUNT:
+      if (found == 0)
+        return;
+
+      *ret = malloc ((found + 1) * sizeof (char *));
+      if (*ret == NULL)
+        error (EXIT_FAILURE, errno, "malloc");
+
+      break;
+
+    case COPY:
+      (*ret)[found] = NULL;
+      break;
+
+    default:
+      assert (0);
     }
-    b = gtk_tree_model_iter_next (model, &iter);
-    ++i;
-  }
-
-  (*ret)[j] = NULL;
+  } /* "mode" loop */
 }
 
 static void
 set_disks_from_ui (struct config *config)
 {
-  set_from_ui_generic (all_disks, &config->disks,
-                       GTK_TREE_VIEW (disks_list));
+  set_from_ui_generic (&config->disks, GTK_TREE_VIEW (disks_list));
 }
 
 static void
 set_removable_from_ui (struct config *config)
 {
-  set_from_ui_generic (all_removable, &config->removable,
-                       GTK_TREE_VIEW (removable_list));
+  set_from_ui_generic (&config->removable, GTK_TREE_VIEW (removable_list));
 }
 
 static void
