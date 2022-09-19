@@ -94,7 +94,9 @@ extern void update_config_from_kernel_cmdline (struct config *config, char **cmd
 extern void kernel_conversion (struct config *, char **cmdline, int cmdline_source);
 
 /* gui.c */
-extern void gui_conversion (struct config *);
+extern void gui_conversion (struct config *config,
+                            const char * const *disks,
+                            const char * const *removable);
 
 /* conversion.c */
 struct data_conn {          /* Data per NBD connection / physical disk. */

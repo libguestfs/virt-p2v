@@ -101,7 +101,9 @@
 #endif
 
 static void create_connection_dialog (struct config *);
-static void create_conversion_dialog (struct config *);
+static void create_conversion_dialog (struct config *config,
+                                      const char * const *disks,
+                                      const char * const *removable);
 static void create_running_dialog (void);
 static void show_connection_dialog (void);
 static void show_conversion_dialog (void);
@@ -160,11 +162,13 @@ static const char gplv2plus[] =
  * Note that C<gtk_init> etc have already been called in C<main>.
  */
 void
-gui_conversion (struct config *config)
+gui_conversion (struct config *config,
+                const char * const *disks,
+                const char * const *removable)
 {
   /* Create the dialogs. */
   create_connection_dialog (config);
-  create_conversion_dialog (config);
+  create_conversion_dialog (config, disks, removable);
   create_running_dialog ();
 
   /* Start by displaying the connection dialog. */
@@ -680,8 +684,10 @@ connection_next_clicked (GtkWidget *w, gpointer data)
 /*----------------------------------------------------------------------*/
 /* Conversion dialog. */
 
-static void populate_disks (GtkTreeView *disks_list_p);
-static void populate_removable (GtkTreeView *removable_list_p);
+static void populate_disks (GtkTreeView *disks_list_p,
+                            const char * const *disks);
+static void populate_removable (GtkTreeView *removable_list_p,
+                                const char * const *removable);
 static void populate_interfaces (GtkTreeView *interfaces_list_p);
 static void toggled (GtkCellRendererToggle *cell, gchar *path_str, gpointer data);
 static void network_edited_callback (GtkCellRendererToggle *cell, gchar *path_str, gchar *new_text, gpointer data);
@@ -728,7 +734,9 @@ enum {
  * C<show_conversion_dialog>.
  */
 static void
-create_conversion_dialog (struct config *config)
+create_conversion_dialog (struct config *config,
+                          const char * const *disks,
+                          const char * const *removable)
 {
   GtkWidget *back;
   GtkWidget *hbox, *left_vbox, *right_vbox;
@@ -925,7 +933,7 @@ create_conversion_dialog (struct config *config)
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (disks_sw),
                                   GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
   disks_list = gtk_tree_view_new ();
-  populate_disks (GTK_TREE_VIEW (disks_list));
+  populate_disks (GTK_TREE_VIEW (disks_list), disks);
   scrolled_window_add_with_viewport (disks_sw, disks_list);
   gtk_container_add (GTK_CONTAINER (disks_frame), disks_sw);
 
@@ -936,7 +944,7 @@ create_conversion_dialog (struct config *config)
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (removable_sw),
                                   GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
   removable_list = gtk_tree_view_new ();
-  populate_removable (GTK_TREE_VIEW (removable_list));
+  populate_removable (GTK_TREE_VIEW (removable_list), removable);
   scrolled_window_add_with_viewport (removable_sw,  removable_list);
   gtk_container_add (GTK_CONTAINER (removable_frame), removable_sw);
 
@@ -1097,9 +1105,8 @@ repopulate_output_combo (struct config *config)
  * Populate the C<Fixed hard disks> treeview.
  */
 static void
-populate_disks (GtkTreeView *disks_list_p)
+populate_disks (GtkTreeView *disks_list_p, const char * const *disks)
 {
-  const char * const *disks = (const char **)all_disks;
   GtkListStore *disks_store;
   GtkCellRenderer *disks_col_convert, *disks_col_device;
   GtkTreeIter iter;
@@ -1171,9 +1178,9 @@ populate_disks (GtkTreeView *disks_list_p)
  * Populate the C<Removable media> treeview.
  */
 static void
-populate_removable (GtkTreeView *removable_list_p)
+populate_removable (GtkTreeView *removable_list_p,
+                    const char * const *removable)
 {
-  const char * const *removable = (const char **)all_removable;
   GtkListStore *removable_store;
   GtkCellRenderer *removable_col_convert, *removable_col_device;
   GtkTreeIter iter;

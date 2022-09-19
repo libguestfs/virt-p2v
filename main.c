@@ -256,7 +256,8 @@ main (int argc, char *argv[])
       error (EXIT_FAILURE, 0,
              _("gtk_init_check returned false, indicating that\n"
                "a GUI is not possible on this host.  Check X11, $DISPLAY etc."));
-    gui_conversion (config);
+    gui_conversion (config, (const char **)all_disks,
+                    (const char **)all_removable);
   }
 
   guestfs_int_free_string_list (cmdline);
