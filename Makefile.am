@@ -29,10 +29,6 @@ EXTRA_DIST = \
 	$(TESTS) $(LIBGUESTFS_TESTS) $(SLOW_TESTS) \
 	.gitignore \
 	AUTHORS \
-	contrib/aux-scripts/do-build.sh \
-	contrib/build-p2v-iso.sh \
-	contrib/patches/0001-RHEL-5-ONLY-DISABLE-AUTOMATIC-REMOTE-PORT-ALLOCATION.patch \
-	contrib/test-p2v-iso.sh \
 	dependencies.m4 \
 	generate-p2v-authors.pl \
 	generate-p2v-config.pl \
