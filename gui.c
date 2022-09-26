@@ -2026,7 +2026,6 @@ add_v2v_output (gpointer user_data)
 {
   CLEANUP_FREE const char *msg = user_data;
   const char *p;
-  static size_t linelen = 0;
   static enum {
     state_normal,
     state_escape1,       /* seen ESC, expecting [ */
@@ -2036,13 +2035,11 @@ add_v2v_output (gpointer user_data)
     state_escape5,       /* seen ESC [ 0/1 ; 3, expecting 1/2/4/5 */
     state_escape6,       /* seen ESC [ 0/1 ; 3 1/2/5/5, expecting m */
     state_cr,            /* seen CR */
-    state_truncating,    /* truncating line until next \n */
   } state = state_normal;
   static int colour = 0;
   static GtkTextTag *tag = NULL;
   GtkTextBuffer *buf = gtk_text_view_get_buffer (GTK_TEXT_VIEW (v2v_output));
   GtkTextIter iter, iter2;
-  const char *dots = " [...]";
 
   for (p = msg; *p != '\0'; ++p) {
     char c = *p;
@@ -2055,22 +2052,7 @@ add_v2v_output (gpointer user_data)
         state = state_escape1;
         colour = 0;
       }
-      else if (c != '\n' && linelen >= 256) {
-        /* Gtk2 (in ~ Fedora 23) has a regression where it takes much
-         * longer to display long lines, to the point where the
-         * virt-p2v UI would still be slowly displaying kernel modules
-         * while the conversion had finished.  For this reason,
-         * arbitrarily truncate very long lines.
-         */
-        gtk_text_buffer_get_end_iter (buf, &iter);
-        gtk_text_buffer_insert_with_tags (buf, &iter,
-                                          dots, strlen (dots), tag, NULL);
-        state = state_truncating;
-        colour = 0;
-        tag = NULL;
-      }
       else {             /* Treat everything else as a normal char. */
-        if (c != '\n') linelen++; else linelen = 0;
         gtk_text_buffer_get_end_iter (buf, &iter);
         gtk_text_buffer_insert_with_tags (buf, &iter, &c, 1, tag, NULL);
       }
@@ -2134,7 +2116,6 @@ add_v2v_output (gpointer user_data)
         /* Process CRLF as single a newline character. */
         p--;
       else {                    /* Delete current (== last) line. */
-        linelen = 0;
         gtk_text_buffer_get_end_iter (buf, &iter);
         iter2 = iter;
         gtk_text_iter_set_line_offset (&iter, 0);
@@ -2142,13 +2123,6 @@ add_v2v_output (gpointer user_data)
         gtk_text_buffer_delete (buf, &iter, &iter2);
       }
       state = state_normal;
-      break;
-
-    case state_truncating:
-      if (c == '\n') {
-        p--;
-        state = state_normal;
-      }
       break;
     } /* switch (state) */
   } /* for */
