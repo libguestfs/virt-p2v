@@ -47,12 +47,9 @@
  * handled entirely by NetworkManager's L<nm-connection-editor(1)>
  * program and has nothing to do with this code.
  *
- * This file is written in a kind of "pseudo-Gtk" which is backwards
- * compatible from Gtk 2.10 (RHEL 5) through at least Gtk 3.22.  This
- * is done using a few macros to implement old C<gtk_*> functions or
- * map them to newer functions.  Supporting ancient Gtk is important
- * because we want to provide a virt-p2v binary that can run on very
- * old kernels, to support 32 bit and proprietary SCSI drivers.
+ * This file is written in a kind of "pseudo-Gtk" which is backwards compatible
+ * from Gtk 3.0 through at least Gtk 3.22.  This is done using a few macros to
+ * implement old C<gtk_*> functions or map them to newer functions.
  */
 
 #include <config.h>
@@ -86,7 +83,6 @@
 #include "p2v.h"
 
 /* See note about "pseudo-Gtk" above. */
-#include "gui-gtk2-compat.h"
 #include "gui-gtk3-compat.h"
 
 /* Maximum vCPUs and guest memory that we will allow users to set.
@@ -116,9 +112,7 @@ static GtkWidget *conn_dlg,
   *server_entry, *port_entry,
   *username_entry, *password_entry, *identity_entry, *sudo_button,
   *spinner_hbox,
-#ifdef GTK_SPINNER
   *spinner,
-#endif
   *spinner_message, *next_button;
 
 /* The conversion dialog. */
@@ -137,23 +131,6 @@ static GtkWidget *run_dlg,
 
 /* Colour tags used in the v2v_output GtkTextBuffer. */
 static GtkTextTag *v2v_output_tags[16];
-
-#if !GTK_CHECK_VERSION(3,0,0)   /* gtk < 3 */
-/* The license of virt-p2v, for the About dialog. */
-static const char gplv2plus[] =
-  "This program is free software; you can redistribute it and/or modify\n"
-  "it under the terms of the GNU General Public License as published by\n"
-  "the Free Software Foundation; either version 2 of the License, or\n"
-  "(at your option) any later version.\n"
-  "\n"
-  "This program is distributed in the hope that it will be useful,\n"
-  "but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
-  "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n"
-  "GNU General Public License for more details.\n"
-  "\n"
-  "You should have received a copy of the GNU General Public License\n"
-  "along with this program.  If not, see <https://www.gnu.org/licenses/>.\n";
-#endif
 
 /**
  * The entry point from the main program.
@@ -304,10 +281,8 @@ create_connection_dialog (struct config *config)
   gtk_box_pack_start (GTK_BOX (test_hbox), test, TRUE, FALSE, 0);
 
   hbox_new (spinner_hbox, FALSE, 10);
-#ifdef GTK_SPINNER
   spinner = gtk_spinner_new ();
   gtk_box_pack_start (GTK_BOX (spinner_hbox), spinner, FALSE, FALSE, 0);
-#endif
   spinner_message = gtk_label_new (NULL);
   gtk_label_set_line_wrap (GTK_LABEL (spinner_message), TRUE);
   set_padding (spinner_message, 10, 10);
@@ -452,9 +427,7 @@ test_connection_clicked (GtkWidget *w, gpointer data)
 
   gtk_label_set_text (GTK_LABEL (spinner_message), "");
   gtk_widget_show_all (spinner_hbox);
-#ifdef GTK_SPINNER
   gtk_widget_hide (spinner);
-#endif
 
   /* Get the fields from the various widgets. */
   free (config->remote.server);
@@ -550,10 +523,8 @@ start_spinner (gpointer user_data)
 {
   gtk_label_set_text (GTK_LABEL (spinner_message),
                       _("Testing the connection to the conversion server ..."));
-#ifdef GTK_SPINNER
   gtk_widget_show (spinner);
   gtk_spinner_start (GTK_SPINNER (spinner));
-#endif
   return FALSE;
 }
 
@@ -564,10 +535,8 @@ start_spinner (gpointer user_data)
 static gboolean
 stop_spinner (gpointer user_data)
 {
-#ifdef GTK_SPINNER
   gtk_spinner_stop (GTK_SPINNER (spinner));
   gtk_widget_hide (spinner);
-#endif
   return FALSE;
 }
 
@@ -652,11 +621,7 @@ about_button_clicked (GtkWidget *w, gpointer data)
                 "copyright", "\u00A9 2009-2019 Red Hat Inc.",
                 "comments",
                   _("Virtualize a physical machine to run on KVM"),
-#if GTK_CHECK_VERSION(3,0,0)   /* gtk >= 3 */
                 "license-type", GTK_LICENSE_GPL_2_0,
-#else
-                "license", gplv2plus,
-#endif
                 "website", "http://libguestfs.org/",
                 "authors", authors,
                 NULL);
@@ -1855,11 +1820,7 @@ create_running_dialog (void)
 #else
   PangoFontDescription *font;
   font = pango_font_description_from_string ("Monospace 11");
-#if GTK_CHECK_VERSION(3,0,0)	/* gtk >= 3 */
   gtk_widget_override_font (v2v_output, font);
-#else
-  gtk_widget_modify_font (v2v_output, font);
-#endif
   pango_font_description_free (font);
 #endif
 

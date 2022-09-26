@@ -106,7 +106,6 @@ virt_p2v_SOURCES = \
 	cpuid.c \
 	disks.c \
 	gui.c \
-	gui-gtk2-compat.h \
 	gui-gtk3-compat.h \
 	inhibit.c \
 	kernel.c \
