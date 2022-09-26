@@ -247,7 +247,7 @@ create_connection_dialog (struct config *config)
   password_entry = gtk_entry_new ();
   gtk_label_set_mnemonic_widget (GTK_LABEL (password_label), password_entry);
   gtk_entry_set_visibility (GTK_ENTRY (password_entry), FALSE);
-#ifdef GTK_INPUT_PURPOSE_PASSWORD
+#ifdef GTK_INPUT_PURPOSE_PASSWORD /* guaranteed if gtk >= 3.5.12 */
   gtk_entry_set_input_purpose (GTK_ENTRY (password_entry),
                                GTK_INPUT_PURPOSE_PASSWORD);
 #endif
