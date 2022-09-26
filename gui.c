@@ -1792,8 +1792,8 @@ static gboolean close_running_dialog (GtkWidget *w, GdkEvent *event, gpointer da
 
 #ifdef USE_POPOVERS
 static const GActionEntry shutdown_actions[] = {
-  { "shutdown", activate_action, NULL, NULL, NULL },
-  { "reboot", activate_action, NULL, NULL, NULL },
+  { .name = "shutdown", .activate = activate_action },
+  { .name = "reboot", .activate = activate_action },
 };
 #endif
 
