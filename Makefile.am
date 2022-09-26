@@ -141,13 +141,13 @@ virt_p2v_CFLAGS = \
 	$(WARN_CFLAGS) $(WERROR_CFLAGS) \
 	$(PCRE2_CFLAGS) \
 	$(LIBXML2_CFLAGS) \
-	$(GTK_CFLAGS) \
+	$(GTK3_CFLAGS) \
 	$(DBUS_CFLAGS)
 
 virt_p2v_LDADD = \
 	$(PCRE2_LIBS) \
 	$(LIBXML2_LIBS) \
-	$(GTK_LIBS) \
+	$(GTK3_LIBS) \
 	$(DBUS_LIBS) \
 	gnulib/lib/libgnu.la \
 	-lm
@@ -169,7 +169,7 @@ dependencies_files = \
 
 $(dependencies_files): dependencies.m4 config.status
 	define=`echo $@ | $(SED) 's/dependencies.//;y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/'`; \
-	m4 -D$$define=1 -DGTK_VERSION=$(GTK_VERSION) $< > $@-t
+	m4 -D$$define=1 $< > $@-t
 	mv $@-t $@
 
 # Support files needed by the virt-p2v-make-* scripts.

@@ -80,13 +80,9 @@ Optional.
 L<virt-p2v(1)> requires nbdkit, but it only needs to be present on the
 virt-p2v ISO, it does not need to be installed at compile time.
 
-=item Gtk E<ge> 2.24, or 3
+=item Gtk 3
 
 I<Required>.
-
-Either Gtk 2 or Gtk 3 can be used.  If you want to select a specific
-version of Gtk, use S<C<./configure --with-gtk=2>> or
-S<C<./configure --with-gtk=3>>.
 
 =item D-Bus
 
@@ -200,11 +196,6 @@ by users.
 
 For custom and/or local builds, this can be set to C<local> to
 indicate this is I<not> a distro build.
-
-=item B<--with-gtk=3>
-
-This option forces virt-p2v to be built against Gtk 3, which is
-currently the most widely tested configuration.
 
 =back
 

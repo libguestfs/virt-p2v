@@ -24,7 +24,7 @@ ifelse(REDHAT,1,
   dnl Used by the virt-p2v binary.
   pcre2
   libxml2
-  gtk`'GTK_VERSION
+  gtk3
   dbus-libs
 
   dnl Run as external programs by the p2v binary.
@@ -68,7 +68,7 @@ ifelse(REDHAT,1,
 ifelse(DEBIAN,1,
   libpcre2-8-0
   libxml2
-  ifelse(GTK_VERSION,2,libgtk`'GTK_VERSION`'.0-0,libgtk-`'GTK_VERSION`'-0)
+  libgtk-3-0
   libdbus-1-3
   openssh-client
   nbdkit
@@ -88,7 +88,7 @@ ifelse(DEBIAN,1,
 ifelse(ARCHLINUX,1,
   pcre2
   libxml2
-  gtk`'GTK_VERSION
+  gtk3
   dbus
   openssh
   nbdkit
@@ -110,7 +110,7 @@ ifelse(ARCHLINUX,1,
 ifelse(SUSE,1,
   pcre2
   libxml2
-  gtk`'GTK_VERSION
+  gtk3
   libdbus-1-3
   nbdkit-server
   nbdkit-file-plugin
@@ -135,7 +135,7 @@ ifelse(OPENMANDRIVA,1,
   dnl Used by the virt-p2v binary.
   pcre2
   libxml2
-  gtk`'GTK_VERSION
+  gtk3
   dbus-libs
 
   dnl Run as external programs by the p2v binary.
