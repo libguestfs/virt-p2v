@@ -80,7 +80,11 @@ Optional.
 L<virt-p2v(1)> requires nbdkit, but it only needs to be present on the
 virt-p2v ISO, it does not need to be installed at compile time.
 
-=item Gtk 3
+=item Glib E<ge> 2.56
+
+I<Required>.
+
+=item Gtk E<ge> 3.22
 
 I<Required>.
 

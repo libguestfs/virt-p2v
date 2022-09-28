@@ -32,8 +32,9 @@ PKG_CHECK_MODULES([PCRE2], [libpcre2-8])
 dnl libxml2 (required)
 PKG_CHECK_MODULES([LIBXML2], [libxml-2.0])
 
-dnl Check for Gtk 3 library, used by virt-p2v (required).
-PKG_CHECK_MODULES([GTK3], [gtk+-3.0])
+dnl Check for the Glib 2 and Gtk 3 libraries, used by virt-p2v (required).
+PKG_CHECK_MODULES([GLIB2], [glib-2.0 >= 2.56])
+PKG_CHECK_MODULES([GTK3], [gtk+-3.0 >= 3.22])
 
 dnl D-Bus is an optional dependency of virt-p2v.
 PKG_CHECK_MODULES([DBUS], [dbus-1], [

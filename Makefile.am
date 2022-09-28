@@ -131,6 +131,10 @@ nodist_virt_p2v_SOURCES = \
 virt_p2v_CPPFLAGS = \
 	-DLOCALEBASEDIR=\""$(datadir)/locale"\" \
 	-DGTK_DISABLE_DEPRECATED \
+	-DGLIB_VERSION_MIN_REQUIRED=GLIB_VERSION_2_56 \
+	-DGLIB_VERSION_MAX_ALLOWED=GLIB_VERSION_2_56 \
+	-DGDK_VERSION_MIN_REQUIRED=GDK_VERSION_3_22 \
+	-DGDK_VERSION_MAX_ALLOWED=GDK_VERSION_3_22 \
 	-I$(srcdir)/libguestfs \
 	-I$(srcdir)/miniexpect \
 	-I$(srcdir)/gnulib/lib -Ignulib/lib
