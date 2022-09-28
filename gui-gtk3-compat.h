@@ -16,19 +16,6 @@
  */
 
 /* Backwards compatibility for some deprecated functions in Gtk 3. */
-#if !GTK_CHECK_VERSION(3,2,0)   /* gtk < 3.2 */
-static gboolean
-gdk_event_get_button (const GdkEvent *event, guint *button)
-{
-  if (event->type != GDK_BUTTON_PRESS)
-    return FALSE;
-
-  *button = ((const GdkEventButton *) event)->button;
-  return TRUE;
-}
-#endif
-
-#if GTK_CHECK_VERSION(3,2,0)   /* gtk >= 3.2 */
 #define hbox_new(box, homogeneous, spacing)                    \
   do {                                                         \
     (box) = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, spacing); \
@@ -41,14 +28,7 @@ gdk_event_get_button (const GdkEvent *event, guint *button)
     if (homogeneous)                                           \
       gtk_box_set_homogeneous (GTK_BOX (box), TRUE);           \
   } while (0)
-#else /* gtk < 3.2 */
-#define hbox_new(box, homogeneous, spacing)             \
-  (box) = gtk_hbox_new ((homogeneous), (spacing))
-#define vbox_new(box, homogeneous, spacing)             \
-  (box) = gtk_vbox_new ((homogeneous), (spacing))
-#endif
 
-#if GTK_CHECK_VERSION(3,4,0)   /* gtk >= 3.4 */
 /* Copy this enum from GtkTable, as when building without deprecated
  * functions this is not automatically pulled in.
  */
@@ -77,34 +57,14 @@ typedef enum
     gtk_grid_attach (GTK_GRID (grid), (child),                          \
                      (left), (top), (right)-(left), 1);    \
   } while (0)
-#else
-#define table_new(table, rows, columns)                 \
-  (table) = gtk_table_new ((rows), (columns), FALSE)
-#define table_attach(table, child, left, right,top, xoptions, yoptions, xpadding, ypadding) \
-  gtk_table_attach (GTK_TABLE (table), (child),                         \
-                    (left), (right), (top), (top + 1),                   \
-                    (xoptions), (yoptions), (xpadding), (ypadding))
-#endif
 
-#if GTK_CHECK_VERSION(3,8,0)   /* gtk >= 3.8 */
 #define scrolled_window_add_with_viewport(container, child)     \
   gtk_container_add (GTK_CONTAINER (container), child)
-#else
-#define scrolled_window_add_with_viewport(container, child)             \
-  gtk_scrolled_window_add_with_viewport (GTK_SCROLLED_WINDOW (container), child)
-#endif
 
-#if !GTK_CHECK_VERSION(3,10,0)   /* gtk < 3.10 */
-#define gdk_event_get_event_type(event) ((event)->type)
-#endif
-
-#if GTK_CHECK_VERSION(3,10,0)   /* gtk >= 3.10 */
 #undef GTK_STOCK_DIALOG_WARNING
 #define GTK_STOCK_DIALOG_WARNING "dialog-warning"
 #define gtk_image_new_from_stock gtk_image_new_from_icon_name
-#endif
 
-#if GTK_CHECK_VERSION(3,14,0)   /* gtk >= 3.14 */
 #define set_padding(widget, xpad, ypad)                               \
   do {                                                                \
     if ((xpad) != 0) {                                                \
@@ -131,9 +91,3 @@ typedef enum
     else                                                        \
       gtk_widget_set_valign ((widget), GTK_ALIGN_CENTER);       \
   } while (0)
-#else  /* gtk < 3.14 */
-#define set_padding(widget, xpad, ypad)                 \
-  gtk_misc_set_padding(GTK_MISC(widget),(xpad),(ypad))
-#define set_alignment(widget, xalign, yalign)                   \
-  gtk_misc_set_alignment(GTK_MISC(widget),(xalign),(yalign))
-#endif

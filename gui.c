@@ -47,9 +47,10 @@
  * handled entirely by NetworkManager's L<nm-connection-editor(1)>
  * program and has nothing to do with this code.
  *
- * This file is written in a kind of "pseudo-Gtk" which is backwards compatible
- * from Gtk 3.0 through at least Gtk 3.22.  This is done using a few macros to
- * implement old C<gtk_*> functions or map them to newer functions.
+ * This file is written in a kind of "pseudo-Gtk" that currently targets Gtk
+ * 3.22 exclusively, but may later be extended to a broader Gtk version range.
+ * This is done using a few macros to implement old C<gtk_*> functions or map
+ * them to newer functions.
  */
 
 #include <config.h>
@@ -91,10 +92,6 @@
  */
 #define MAX_SUPPORTED_VCPUS 160
 #define MAX_SUPPORTED_MEMORY_MB (UINT64_C (4000 * 1024))
-
-#if GLIB_CHECK_VERSION(2,32,0) && GTK_CHECK_VERSION(3,12,0)   /* glib >= 2.32 && gtk >= 3.12 */
-#define USE_POPOVERS
-#endif
 
 static void create_connection_dialog (struct config *);
 static void create_conversion_dialog (struct config *config,
@@ -247,10 +244,8 @@ create_connection_dialog (struct config *config)
   password_entry = gtk_entry_new ();
   gtk_label_set_mnemonic_widget (GTK_LABEL (password_label), password_entry);
   gtk_entry_set_visibility (GTK_ENTRY (password_entry), FALSE);
-#ifdef GTK_INPUT_PURPOSE_PASSWORD /* guaranteed if gtk >= 3.5.12 */
   gtk_entry_set_input_purpose (GTK_ENTRY (password_entry),
                                GTK_INPUT_PURPOSE_PASSWORD);
-#endif
   if (config->auth.password != NULL)
     gtk_entry_set_text (GTK_ENTRY (password_entry), config->auth.password);
   table_attach (table, password_entry,
@@ -1747,21 +1742,15 @@ static void *start_conversion_thread (void *data);
 static gboolean conversion_error (gpointer user_data);
 static gboolean conversion_finished (gpointer user_data);
 static void cancel_conversion_dialog (GtkWidget *w, gpointer data);
-#ifdef USE_POPOVERS
 static void activate_action (GSimpleAction *action, GVariant *parameter, gpointer user_data);
-#else
-static void shutdown_button_clicked (GtkToolButton *w, gpointer data);
-#endif
 static void shutdown_clicked (GtkWidget *w, gpointer data);
 static void reboot_clicked (GtkWidget *w, gpointer data);
 static gboolean close_running_dialog (GtkWidget *w, GdkEvent *event, gpointer data);
 
-#ifdef USE_POPOVERS
 static const GActionEntry shutdown_actions[] = {
   { .name = "shutdown", .activate = activate_action },
   { .name = "reboot", .activate = activate_action },
 };
-#endif
 
 /**
  * Create the running dialog.
@@ -1777,14 +1766,8 @@ create_running_dialog (void)
     { "black", "maroon", "green", "olive", "navy", "purple", "teal", "silver",
       "gray", "red", "lime", "yellow", "blue", "fuchsia", "cyan", "white" };
   GtkTextBuffer *buf;
-#ifdef USE_POPOVERS
   GMenu *shutdown_menu;
   GSimpleActionGroup *shutdown_group;
-#else
-  GtkWidget *shutdown_menu;
-  GtkWidget *shutdown_menu_item;
-  GtkWidget *reboot_menu_item;
-#endif
 
   run_dlg = gtk_dialog_new ();
   gtk_window_set_title (GTK_WINDOW (run_dlg), g_get_prgname ());
@@ -1810,19 +1793,12 @@ create_running_dialog (void)
       gtk_text_buffer_create_tag (buf, tag_name, "foreground", tags[i], NULL);
   }
 
-#if GTK_CHECK_VERSION(3,16,0)   /* gtk >= 3.16 */
   /* XXX This only sets the "CSS" style.  It's not clear how to set
    * the particular font.  However (by accident) this does at least
    * set the widget to use a monospace font.
    */
   GtkStyleContext *context = gtk_widget_get_style_context (v2v_output);
   gtk_style_context_add_class (context, "monospace");
-#else
-  PangoFontDescription *font;
-  font = pango_font_description_from_string ("Monospace 11");
-  gtk_widget_override_font (v2v_output, font);
-  pango_font_description_free (font);
-#endif
 
   log_label = gtk_label_new (NULL);
   set_alignment (log_label, 0., 0.5);
@@ -1845,7 +1821,6 @@ create_running_dialog (void)
      status_label, TRUE, TRUE, 0);
 
   /* Shutdown popup menu. */
-#ifdef USE_POPOVERS
   shutdown_menu = g_menu_new ();
   g_menu_append (shutdown_menu, _("_Shutdown"), "shutdown.shutdown");
   g_menu_append (shutdown_menu, _("_Reboot"), "shutdown.reboot");
@@ -1854,15 +1829,6 @@ create_running_dialog (void)
   g_action_map_add_action_entries (G_ACTION_MAP (shutdown_group),
                                    shutdown_actions,
                                    G_N_ELEMENTS (shutdown_actions), NULL);
-#else
-  shutdown_menu = gtk_menu_new ();
-  shutdown_menu_item = gtk_menu_item_new_with_mnemonic (_("_Shutdown"));
-  gtk_menu_shell_append (GTK_MENU_SHELL (shutdown_menu), shutdown_menu_item);
-  gtk_widget_show (shutdown_menu_item);
-  reboot_menu_item = gtk_menu_item_new_with_mnemonic (_("_Reboot"));
-  gtk_menu_shell_append (GTK_MENU_SHELL (shutdown_menu), reboot_menu_item);
-  gtk_widget_show (reboot_menu_item);
-#endif
 
   /* Buttons. */
   gtk_dialog_add_buttons (GTK_DIALOG (run_dlg),
@@ -1870,7 +1836,6 @@ create_running_dialog (void)
                           NULL);
   cancel_button = gtk_dialog_get_widget_for_response (GTK_DIALOG (run_dlg), 1);
   gtk_widget_set_sensitive (cancel_button, FALSE);
-#ifdef USE_POPOVERS
   shutdown_button = gtk_menu_button_new ();
   gtk_button_set_use_underline (GTK_BUTTON (shutdown_button), TRUE);
   gtk_button_set_label (GTK_BUTTON (shutdown_button), _("_Shutdown ..."));
@@ -1880,13 +1845,6 @@ create_running_dialog (void)
   gtk_menu_button_set_use_popover (GTK_MENU_BUTTON (shutdown_button), TRUE);
   gtk_menu_button_set_menu_model (GTK_MENU_BUTTON (shutdown_button),
                                   G_MENU_MODEL (shutdown_menu));
-#else
-  shutdown_button = GTK_WIDGET (gtk_menu_tool_button_new (NULL,
-                                                          _("_Shutdown ...")));
-  gtk_tool_button_set_use_underline (GTK_TOOL_BUTTON (shutdown_button), TRUE);
-  gtk_menu_tool_button_set_menu (GTK_MENU_TOOL_BUTTON (shutdown_button),
-                                 shutdown_menu);
-#endif
   gtk_widget_set_sensitive (shutdown_button, FALSE);
   gtk_dialog_add_action_widget (GTK_DIALOG (run_dlg), shutdown_button, 2);
 
@@ -1897,14 +1855,6 @@ create_running_dialog (void)
                             G_CALLBACK (gtk_main_quit), NULL);
   g_signal_connect (G_OBJECT (cancel_button), "clicked",
                     G_CALLBACK (cancel_conversion_dialog), NULL);
-#ifndef USE_POPOVERS
-  g_signal_connect (G_OBJECT (shutdown_button), "clicked",
-                    G_CALLBACK (shutdown_button_clicked), shutdown_menu);
-  g_signal_connect (G_OBJECT (shutdown_menu_item), "activate",
-                    G_CALLBACK (shutdown_clicked), NULL);
-  g_signal_connect (G_OBJECT (reboot_menu_item), "activate",
-                    G_CALLBACK (reboot_clicked), NULL);
-#endif
 }
 
 /**
@@ -2367,7 +2317,6 @@ cancel_conversion_dialog (GtkWidget *w, gpointer data)
   gtk_widget_destroy (dlg);
 }
 
-#ifdef USE_POPOVERS
 static void
 activate_action (GSimpleAction *action, GVariant *parameter, gpointer user_data)
 {
@@ -2377,16 +2326,6 @@ activate_action (GSimpleAction *action, GVariant *parameter, gpointer user_data)
   else if (STREQ (action_name, "reboot"))
     reboot_clicked (NULL, user_data);
 }
-#else
-static void
-shutdown_button_clicked (GtkToolButton *w, gpointer data)
-{
-  GtkMenu *menu = data;
-
-  gtk_menu_popup (menu, NULL, NULL, NULL, NULL, 1,
-                  gtk_get_current_event_time ());
-}
-#endif
 
 static void
 shutdown_clicked (GtkWidget *w, gpointer data)
