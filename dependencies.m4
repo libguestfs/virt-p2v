@@ -24,6 +24,7 @@ ifelse(REDHAT,1,
   dnl Used by the virt-p2v binary.
   pcre2
   libxml2
+  librsvg2
   gtk3
   dbus-libs
 
@@ -68,6 +69,7 @@ ifelse(REDHAT,1,
 ifelse(DEBIAN,1,
   libpcre2-8-0
   libxml2
+  librsvg2-2
   libgtk-3-0
   libdbus-1-3
   openssh-client
@@ -88,6 +90,7 @@ ifelse(DEBIAN,1,
 ifelse(ARCHLINUX,1,
   pcre2
   libxml2
+  librsvg
   gtk3
   dbus
   openssh
@@ -110,6 +113,7 @@ ifelse(ARCHLINUX,1,
 ifelse(SUSE,1,
   pcre2
   libxml2
+  librsvg
   gtk3
   libdbus-1-3
   nbdkit-server
@@ -135,6 +139,7 @@ ifelse(OPENMANDRIVA,1,
   dnl Used by the virt-p2v binary.
   pcre2
   libxml2
+  librsvg
   gtk3
   dbus-libs
 
