@@ -328,7 +328,7 @@ $(BLANK_DISK):
 	$(top_builddir)/run guestfish -N $@=part exit
 
 virt-p2v.img: \
-	    dependencies.m4 \
+	    $(dependencies_files) \
 	    issue \
 	    launch-virt-p2v \
 	    p2v.service \
@@ -373,7 +373,7 @@ stamp-test-virt-p2v-pxe-data-files: \
 	touch $@
 
 test-virt-p2v-pxe.img: \
-	    dependencies.m4 \
+	    $(dependencies_files) \
 	    issue \
 	    launch-virt-p2v \
 	    p2v.service \
