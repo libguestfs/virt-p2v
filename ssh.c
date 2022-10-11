@@ -64,6 +64,13 @@ char *v2v_version = NULL;
 char **input_drivers = NULL;
 char **output_drivers = NULL;
 
+static void free_globals (void) __attribute__((destructor));
+static void
+free_globals (void)
+{
+  pcre2_substring_free ((PCRE2_UCHAR *)v2v_version);
+}
+
 static char *ssh_error;
 
 static void set_ssh_error (const char *fs, ...)
