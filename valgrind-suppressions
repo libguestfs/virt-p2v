@@ -49,6 +49,13 @@
    fun:g_daemon_vfs_init
 }
 
+{
+   atk_leak
+   Memcheck:Leak
+   ...
+   fun:atk_bridge_adaptor_init
+}
+
 # These appeared in glibc 2.35.
 # See also nbdkit commit f6409b4137c1aeb97d01eef5753f22033d64bfd4
 {
