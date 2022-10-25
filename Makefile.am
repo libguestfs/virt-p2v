@@ -327,6 +327,10 @@ $(PHYSICAL_MACHINE):
 $(BLANK_DISK):
 	$(top_builddir)/run guestfish -N $@=part exit
 
+# Note before running targets that use this (eg.
+# “make run-virt-p2v-in-a-vm”) you can optionally set
+# VIRT_P2V_OSVERSION to control the virt-builder osversion.  If not
+# set then it defaults to the osversion of your current system.
 virt-p2v.img: \
 	    $(dependencies_files) \
 	    issue \
@@ -334,7 +338,7 @@ virt-p2v.img: \
 	    p2v.service \
 	    virt-p2v \
 	    virt-p2v-make-disk
-	$(top_builddir)/run virt-p2v-make-disk -o $@
+	$(top_builddir)/run virt-p2v-make-disk $(VIRT_P2V_OSVERSION) -o $@
 
 # Tests.
 
