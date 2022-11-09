@@ -20,6 +20,7 @@
 #include <dirent.h>
 #include <errno.h>
 #include <error.h>
+#include <fcntl.h>
 #include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -65,6 +66,57 @@ partition_parent (dev_t part_dev)
     return 0;
 
   return makedev (parent_major, parent_minor);
+}
+
+/**
+ * Return true if the named device (eg. C<dev == "sda">) is a Removable Media
+ * SCSI Disk with no media inserted. This covers floppy drives, but not CD-ROM
+ * drives (intentionally).
+ */
+static int
+device_has_no_media (const char *dev)
+{
+  int ret;
+  gchar *sysfs_pathname;
+  gchar *sysfs_contents;
+  gsize sysfs_size;
+  gchar *dev_pathname;
+  int dev_fd;
+
+  ret = 0;
+
+  if (!STRPREFIX (dev, "sd"))
+    return ret;
+
+  sysfs_pathname = g_strdup_printf ("/sys/block/%s/removable", dev);
+
+  if (!g_file_get_contents (sysfs_pathname, &sysfs_contents, &sysfs_size, NULL))
+    goto free_sysfs_pathname;
+
+  if (sysfs_size < 2 || sysfs_contents[0] != '1' || sysfs_contents[1] != '\n')
+    goto free_sysfs_contents;
+
+  dev_pathname = g_strdup_printf ("/dev/%s", dev);
+
+  dev_fd = open (dev_pathname, O_RDONLY | O_CLOEXEC);
+  if (dev_fd == -1) {
+    if (errno == ENOMEDIUM)
+      ret = 1;
+
+    goto free_dev_pathname;
+  }
+  close (dev_fd);
+
+free_dev_pathname:
+  g_free (dev_pathname);
+
+free_sysfs_contents:
+  g_free (sysfs_contents);
+
+free_sysfs_pathname:
+  g_free (sysfs_pathname);
+
+  return ret;
 }
 
 /**
@@ -139,6 +191,12 @@ find_all_disks (char ***disks, char ***removable)
         STRPREFIX (d->d_name, "ubd") ||
         STRPREFIX (d->d_name, "vd")) {
       char *p;
+      /* Skip SCSI disk drives with removable media that have no media inserted
+       * -- effectively, empty floppy drives. Note that SCSI CD-ROMs are named
+       * C<sr*> and thus handled on the other branch.
+       */
+      if (device_has_no_media (d->d_name))
+        continue;
 
       /* Skip the device containing the root filesystem. */
       if (device_contains (d->d_name, root_device))
