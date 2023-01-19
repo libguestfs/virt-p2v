@@ -48,6 +48,7 @@ eval set -- "$TEMP"
 output=
 upload=
 verbose=
+declare -a install_repo_packages_option
 declare -a update_option=(--update)
 declare -a passthru
 
@@ -198,6 +199,17 @@ case "$osversion" in
                 update_option=(--run-command 'dnf -y update --exclude=kernel\*')
                 ;;
         esac
+        # For RHEL-9, we need to grab the metacity window manager from EPEL-9.
+        # Enable the EPEL-9 repository by installing the RPM containing the
+        # *.repo file(s) directly from the network.
+        case "$osversion" in
+            rhel-9.*)
+                install_repo_packages_option=(
+                  --install
+                  https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
+                )
+                ;;
+        esac
         ;;
     debian-*|ubuntu-*)
         depsfile="$datadir/dependencies.debian"
@@ -260,6 +272,7 @@ virt-builder "$osversion"                                       \
     $preinstall_args                                            \
     --hostname p2v.local                                        \
     --run-command 'hostname p2v.local'                          \
+    "${install_repo_packages_option[@]}"                        \
     "${update_option[@]}"                                       \
     --install "$install"                                        \
     --root-password password:p2v                                \
