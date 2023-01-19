@@ -170,15 +170,15 @@ xzcat "$virt_p2v_xz_binary" > "$virt_p2v_binary"
 case "$osversion" in
     centos-*|fedora-*|rhel-*|scientificlinux-*|oraclelinux-*)
         depsfile="$datadir/dependencies.redhat"
-        cat > $tmpdir/p2v.conf <<'EOF'
-add_drivers+=" usb-storage "
-EOF
-        cat > $tmpdir/post-install <<'EOF'
-#!/bin/bash
-# Rebuild the initramfs.
-latest_version="$(cd /lib/modules; ls -1vr | head -1)"
-dracut -v -f --kver $latest_version
-EOF
+        printf '%s\n'                      \
+            'add_drivers+=" usb-storage "' \
+            > $tmpdir/p2v.conf
+        printf '%s\n'                                                \
+            '#!/bin/bash'                                            \
+            '# Rebuild the initramfs.'                               \
+            'latest_version="$(cd /lib/modules; ls -1vr | head -1)"' \
+            'dracut -v -f --kver $latest_version'                    \
+            > $tmpdir/post-install
         # Double quotes because we want $tmpdir to be expanded:
         extra_args="
           --selinux-relabel
@@ -201,11 +201,11 @@ EOF
         ;;
     debian-*|ubuntu-*)
         depsfile="$datadir/dependencies.debian"
-        cat > $tmpdir/policy-rc.d <<'EOF'
-#!/bin/sh
-# Avoid running daemons during the upgrade/installation
-exit 101
-EOF
+        printf '%s\n' \                                               \
+            '#!/bin/sh'                                               \
+            '# Avoid running daemons during the upgrade/installation' \
+            'exit 101'                                                \
+            > $tmpdir/policy-rc.d
         chmod +x $tmpdir/policy-rc.d
         # Double quotes because we want $tmpdir to be expanded:
         preinstall_args="
