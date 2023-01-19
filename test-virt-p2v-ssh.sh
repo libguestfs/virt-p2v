@@ -57,4 +57,4 @@ while true ; do
 done
 
 # Now run the interactive shell.
-exec bash
+exec bash --norc

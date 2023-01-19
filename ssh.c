@@ -469,7 +469,7 @@ start_ssh (unsigned spawn_flags, struct config *config,
    * We don't know how command line editing is set up
    * (https://bugzilla.redhat.com/1314244#c9).
    */
-  if (mexp_printf (h, "exec bash --noediting --noprofile\n") == -1) {
+  if (mexp_printf (h, "exec bash --noediting --noprofile --norc\n") == -1) {
     set_ssh_mexp_error ("mexp_printf");
     mexp_close (h);
     return NULL;
