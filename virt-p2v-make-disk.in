@@ -48,6 +48,7 @@ eval set -- "$TEMP"
 output=
 upload=
 verbose=
+declare -a update_option=(--update)
 declare -a passthru
 
 usage ()
@@ -184,6 +185,19 @@ EOF
           --upload $tmpdir/p2v.conf:/etc/dracut.conf.d/
           --run $tmpdir/post-install
         "
+        # Fedora 34 through 36, and presumably RHEL-9 (based on Fedora 34)
+        # suffer from a bug where a kernel image installation via libguestfs
+        # pollutes the just installed kernel's commandline in the boot loader
+        # config file.  Irrelevant and bogus parameters from the appliance
+        # kernel's /proc/cmdline are copied over.  This prevents the root
+        # filesystem from being mounted.  Refer to
+        # <https://bugzilla.redhat.com/show_bug.cgi?id=1945835#c24> and/or
+        # commit 2764abefaa14.
+        case "$osversion" in
+            fedora-34|fedora-35|fedora-36|rhel-9.*)
+                update_option=(--run-command 'dnf -y update --exclude=kernel\*')
+                ;;
+        esac
         ;;
     debian-*|ubuntu-*)
         depsfile="$datadir/dependencies.debian"
@@ -246,7 +260,7 @@ virt-builder "$osversion"                                       \
     $preinstall_args                                            \
     --hostname p2v.local                                        \
     --run-command 'hostname p2v.local'                          \
-    --run-command 'dnf -y update --exclude=kernel\*'            \
+    "${update_option[@]}"                                       \
     --install "$install"                                        \
     --root-password password:p2v                                \
     --upload "$datadir"/issue:/etc/issue                        \
