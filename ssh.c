@@ -1015,11 +1015,10 @@ static void
 add_output_driver (const char *name)
 {
   /* Ignore the 'vdsm' driver, since that should only be used by VDSM.
-   * Ignore the 'openstack' and 'rhv-upload' drivers, since we do not
-   * support passing all the options for them.
+   * Ignore the 'rhv-upload' driver, since we do not support passing all the
+   * options for it.
    */
   if (STRNEQ (name, "vdsm") &&
-      STRNEQ (name, "openstack") &&
       STRNEQ (name, "rhv-upload"))
     add_option ("output", &output_drivers, name);
 }

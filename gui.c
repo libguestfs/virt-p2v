@@ -848,6 +848,8 @@ create_conversion_dialog (struct config *config,
                                    "<b>local</b> means put it in a directory "
                                    "on the conversion server.  "
                                    "<b>rhv</b> means write it to RHV-M/oVirt.  "
+                                   "<b>openstack</b> means write it to "
+                                   "OpenStack.  "
                                    "<b>glance</b> means write it to OpenStack "
                                    "Glance.  "
                                    "See the virt-v2v(1) manual page for more "
@@ -944,7 +946,8 @@ create_conversion_dialog (struct config *config,
                                    "virt-v2v as the argument of a separate "
                                    "<b>-oo</b> option.  Do not place a space "
                                    "character at either side of either comma "
-                                   "separator."));
+                                   "separator.  Mainly useful for "
+                                   "<b>openstack</b>."));
   populate_misc_opts (GTK_ENTRY (oo_entry), config->output.misc);
   table_attach (output_tbl, oo_entry,
                 1, 2, row, GTK_FILL, GTK_FILL, 1, 1);
