@@ -48,6 +48,7 @@
 extern void guestfs_int_free_string_list (char **);
 extern size_t guestfs_int_count_strings (char *const *);
 extern char **guestfs_int_copy_string_list (char *const *);
+extern char *guestfs_int_join_strings (const char *sep, char *const *);
 extern char **guestfs_int_split_string (char sep, const char *);
 extern int guestfs_int_random_string (char *ret, size_t len);
 extern char *guestfs_int_drive_name (size_t index, char *ret);

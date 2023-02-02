@@ -77,6 +77,41 @@ guestfs_int_copy_string_list (char *const *argv)
   return ret;
 }
 
+char *
+guestfs_int_join_strings (const char *sep, char *const *argv)
+{
+  size_t i, len, seplen, rlen;
+  char *r;
+
+  seplen = strlen (sep);
+
+  len = 0;
+  for (i = 0; argv[i] != NULL; ++i) {
+    if (i > 0)
+      len += seplen;
+    len += strlen (argv[i]);
+  }
+  len++; /* for final \0 */
+
+  r = malloc (len);
+  if (r == NULL)
+    return NULL;
+
+  rlen = 0;
+  for (i = 0; argv[i] != NULL; ++i) {
+    if (i > 0) {
+      memcpy (&r[rlen], sep, seplen);
+      rlen += seplen;
+    }
+    len = strlen (argv[i]);
+    memcpy (&r[rlen], argv[i], len);
+    rlen += len;
+  }
+  r[rlen] = '\0';
+
+  return r;
+}
+
 /**
  * Split string at separator character C<sep>, returning the list of
  * strings.  Returns C<NULL> on memory allocation failure.
