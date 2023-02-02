@@ -150,6 +150,16 @@ gui_conversion (struct config *config,
   gtk_main ();
 }
 
+/**
+ * Trivial helper (shorthand) function for duplicating the contents of a
+ * GTK_ENTRY.
+ */
+static char *
+entry_text_dup (GtkWidget *entry)
+{
+  return strdup (gtk_entry_get_text (GTK_ENTRY (entry)));
+}
+
 /*----------------------------------------------------------------------*/
 /* Connection dialog. */
 
@@ -426,7 +436,7 @@ test_connection_clicked (GtkWidget *w, gpointer data)
 
   /* Get the fields from the various widgets. */
   free (config->remote.server);
-  config->remote.server = strdup (gtk_entry_get_text (GTK_ENTRY (server_entry)));
+  config->remote.server = entry_text_dup (server_entry);
   if (STREQ (config->remote.server, "")) {
     gtk_label_set_text (GTK_LABEL (spinner_message),
                         _("error: No conversion server given."));
@@ -442,7 +452,7 @@ test_connection_clicked (GtkWidget *w, gpointer data)
     errors++;
   }
   free (config->auth.username);
-  config->auth.username = strdup (gtk_entry_get_text (GTK_ENTRY (username_entry)));
+  config->auth.username = entry_text_dup (username_entry);
   if (STREQ (config->auth.username, "")) {
     gtk_label_set_text (GTK_LABEL (spinner_message),
                         _("error: No user name.  If in doubt, use \"root\"."));
@@ -450,7 +460,7 @@ test_connection_clicked (GtkWidget *w, gpointer data)
     errors++;
   }
   free (config->auth.password);
-  config->auth.password = strdup (gtk_entry_get_text (GTK_ENTRY (password_entry)));
+  config->auth.password = entry_text_dup (password_entry);
 
   free (config->auth.identity.url);
   identity_str = gtk_entry_get_text (GTK_ENTRY (identity_entry));
@@ -2064,7 +2074,7 @@ start_conversion_clicked (GtkWidget *w, gpointer data)
 
   /* Unpack dialog fields and check them. */
   free (config->guestname);
-  config->guestname = strdup (gtk_entry_get_text (GTK_ENTRY (guestname_entry)));
+  config->guestname = entry_text_dup (guestname_entry);
 
   if (STREQ (config->guestname, "")) {
     dlg = gtk_message_dialog_new (GTK_WINDOW (conv_dlg),
