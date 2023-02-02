@@ -672,8 +672,13 @@ static void populate_removable_store (GtkListStore *removable_store,
 static void populate_removable (GtkTreeView *removable_list_p,
                                 const char * const *removable);
 static void populate_interfaces (GtkTreeView *interfaces_list_p);
-static void toggled (GtkCellRendererToggle *cell, gchar *path_str, gpointer data);
-static void network_edited_callback (GtkCellRendererToggle *cell, gchar *path_str, gchar *new_text, gpointer data);
+static void toggled (GtkCellRendererToggle *cell,
+                     gchar *path_str,
+                     gpointer data);
+static void network_edited_callback (GtkCellRendererToggle *cell,
+                                     gchar *path_str,
+                                     gchar *new_text,
+                                     gpointer data);
 static gboolean maybe_identify_click (GtkWidget *interfaces_list_p,
                                       GdkEventButton *event,
                                       gpointer data);
@@ -1755,10 +1760,14 @@ static void *start_conversion_thread (void *data);
 static gboolean conversion_error (gpointer user_data);
 static gboolean conversion_finished (gpointer user_data);
 static void cancel_conversion_dialog (GtkWidget *w, gpointer data);
-static void activate_action (GSimpleAction *action, GVariant *parameter, gpointer user_data);
+static void activate_action (GSimpleAction *action,
+                             GVariant *parameter,
+                             gpointer user_data);
 static void shutdown_clicked (GtkWidget *w, gpointer data);
 static void reboot_clicked (GtkWidget *w, gpointer data);
-static gboolean close_running_dialog (GtkWidget *w, GdkEvent *event, gpointer data);
+static gboolean close_running_dialog (GtkWidget *w,
+                                      GdkEvent *event,
+                                      gpointer data);
 
 static const GActionEntry shutdown_actions[] = {
   { .name = "shutdown", .activate = activate_action },
