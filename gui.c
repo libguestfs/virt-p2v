@@ -686,7 +686,6 @@ static void start_conversion_clicked (GtkWidget *w, gpointer data);
 static void vcpu_topo_toggled (GtkWidget *w, gpointer data);
 static void vcpus_or_memory_check_callback (GtkWidget *w, gpointer data);
 static void notify_ui_callback (int type, const char *data);
-static bool get_phys_topo_from_conv_dlg (void);
 static int get_vcpus_from_conv_dlg (void);
 static uint64_t get_memory_from_conv_dlg (void);
 
@@ -1662,7 +1661,7 @@ vcpu_topo_toggled (GtkWidget *w, gpointer data)
   unsigned vcpus;
   char vcpus_str[64];
 
-  phys_topo = get_phys_topo_from_conv_dlg ();
+  phys_topo = tgl_btn_is_act (vcpu_topo);
   if (phys_topo) {
     struct cpu_topo topo;
 
@@ -1718,12 +1717,6 @@ vcpus_or_memory_check_callback (GtkWidget *w, gpointer data)
   }
   else
     gtk_label_set_text (GTK_LABEL (target_warning_label), "");
-}
-
-static bool
-get_phys_topo_from_conv_dlg (void)
-{
-  return tgl_btn_is_act (vcpu_topo);
 }
 
 static int
@@ -2099,7 +2092,7 @@ start_conversion_clicked (GtkWidget *w, gpointer data)
     return;
   }
 
-  config->vcpu.phys_topo = get_phys_topo_from_conv_dlg ();
+  config->vcpu.phys_topo = tgl_btn_is_act (vcpu_topo);
   config->vcpu.cores = get_vcpus_from_conv_dlg ();
   config->memory = get_memory_from_conv_dlg ();
 
