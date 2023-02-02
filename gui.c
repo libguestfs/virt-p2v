@@ -160,6 +160,16 @@ entry_text_dup (GtkWidget *entry)
   return strdup (gtk_entry_get_text (GTK_ENTRY (entry)));
 }
 
+/**
+ * Trivial helper (shorthand) function for getting the active/inactive state
+ * of a GTK_TOGGLE_BUTTON.
+ */
+static bool
+tgl_btn_is_act (GtkWidget *toggle_button)
+{
+  return gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (toggle_button));
+}
+
 /*----------------------------------------------------------------------*/
 /* Connection dialog. */
 
@@ -360,7 +370,7 @@ username_changed_callback (GtkWidget *w, gpointer data)
 
   str = gtk_entry_get_text (GTK_ENTRY (username_entry));
   username_is_root = str != NULL && STREQ (str, "root");
-  sudo_is_set = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (sudo_button));
+  sudo_is_set = tgl_btn_is_act (sudo_button);
 
   /* The sudo button is sensitive if:
    * - The username is not "root", or
@@ -470,7 +480,7 @@ test_connection_clicked (GtkWidget *w, gpointer data)
     config->auth.identity.url = NULL;
   config->auth.identity.file_needs_update = 1;
 
-  config->auth.sudo = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (sudo_button));
+  config->auth.sudo = tgl_btn_is_act (sudo_button);
 
   if (errors)
     return;
@@ -1713,7 +1723,7 @@ vcpus_or_memory_check_callback (GtkWidget *w, gpointer data)
 static bool
 get_phys_topo_from_conv_dlg (void)
 {
-  return gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (vcpu_topo));
+  return tgl_btn_is_act (vcpu_topo);
 }
 
 static int
