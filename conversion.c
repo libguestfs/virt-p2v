@@ -526,6 +526,15 @@ generate_wrapper_script (struct config *config, const char *remote_dir,
     print_quoted (fp, config->output.storage);
   }
 
+  if (config->output.misc) { /* -oo */
+    size_t i;
+
+    for (i = 0; config->output.misc[i]; ++i) {
+      fprintf (fp, " -oo ");
+      print_quoted (fp, config->output.misc[i]);
+    }
+  }
+
   fprintf (fp, " --root first");
   fprintf (fp, " physical.xml");
   fprintf (fp, " </dev/null");  /* no stdin */

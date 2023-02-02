@@ -43,6 +43,7 @@ P2V_OPTS=(
   p2v.oc=qemu:///session
   p2v.of=raw
   p2v.os=/var/tmp
+  p2v.oo=opt1=val1,opt2=val2
   p2v.network=em1:wired,other
   p2v.dump_config_and_exit
 )
@@ -69,5 +70,6 @@ grep "^output\.allocation.*sparse" $out
 grep "^output\.connection.*qemu:///session" $out
 grep "^output\.format.*raw" $out
 grep "^output\.storage.*/var/tmp" $out
+grep "^output\.misc.*opt1=val1 opt2=val2" $out
 
 rm $out

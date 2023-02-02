@@ -147,6 +147,7 @@ my @fields = [
       ConfigString->new(name => 'connection'),
       ConfigString->new(name => 'format'),
       ConfigString->new(name => 'storage'),
+      ConfigStringList->new(name => 'misc'),
     ],
   ),
 ];
@@ -168,6 +169,7 @@ my @cmdline_aliases = (
   ["p2v.output.connection", "p2v.oc"],
   ["p2v.output.format",     "p2v.of"],
   ["p2v.output.storage",    "p2v.os"],
+  ["p2v.output.misc",       "p2v.oo"],
 );
 
 # Some config entries are not exposed on the kernel command line.
@@ -378,6 +380,15 @@ Set the output storage.  This is the same as the virt-v2v I<-os>
 option.  See L<virt-v2v(1)/OPTIONS>.
 
 If not specified, the default is F</var/tmp> (on the conversion server).",
+  ),
+  "p2v.output.misc" => manual_entry->new(
+    shortopt => "OPTION=VALUE,...",
+    description => "
+Set miscellaneous output option(s) related to the selected output mode.
+This is the same as the virt-v2v I<-oo> option; each C<OPTION=VALUE>
+element in the list will be turned into a separate S<I<-oo
+OPTION=VALUE>> option on the virt-v2v command line.  See
+L<virt-v2v(1)/OPTIONS>.",
   ),
 );
 
