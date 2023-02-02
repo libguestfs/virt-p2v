@@ -116,7 +116,7 @@ static GtkWidget *conn_dlg,
 static GtkWidget *conv_dlg,
   *guestname_entry, *vcpu_topo, *vcpus_entry, *memory_entry,
   *vcpus_warning, *memory_warning, *target_warning_label,
-  *o_combo, *oc_entry, *os_entry, *of_entry, *oa_combo,
+  *o_combo, *oc_entry, *os_entry, *of_entry, *oa_combo, *oo_entry,
   *info_label,
   *disks_list, *removable_list, *interfaces_list;
 static int vcpus_entry_when_last_sensitive;
@@ -674,6 +674,7 @@ static void populate_removable_store (GtkListStore *removable_store,
 static void populate_removable (GtkTreeView *removable_list_p,
                                 const char * const *removable);
 static void populate_interfaces (GtkTreeView *interfaces_list_p);
+static void populate_misc_opts (GtkEntry *entry, char * const *misc);
 static void toggled (GtkCellRendererToggle *cell,
                      gchar *path_str,
                      gpointer data);
@@ -733,7 +734,7 @@ create_conversion_dialog (struct config *config,
   GtkWidget *target_frame, *target_vbox, *target_tbl;
   GtkWidget *guestname_label, *vcpus_label, *memory_label;
   GtkWidget *output_frame, *output_vbox, *output_tbl;
-  GtkWidget *o_label, *oa_label, *oc_label, *of_label, *os_label;
+  GtkWidget *o_label, *oa_label, *oc_label, *of_label, *os_label, *oo_label;
   GtkWidget *info_frame;
   GtkWidget *disks_frame, *disks_sw;
   GtkWidget *removable_frame, *removable_sw;
@@ -927,6 +928,25 @@ create_conversion_dialog (struct config *config,
     break;
   }
   table_attach (output_tbl, oa_combo,
+                1, 2, row, GTK_FILL, GTK_FILL, 1, 1);
+
+  row++;
+  oo_label = gtk_label_new_with_mnemonic (_("M_isc. options (-oo):"));
+  table_attach (output_tbl, oo_label,
+                0, 1, row, GTK_FILL, GTK_FILL, 1, 1);
+  set_alignment (oo_label, 1., 0.5);
+  oo_entry = gtk_entry_new ();
+  gtk_label_set_mnemonic_widget (GTK_LABEL (oo_label), oo_entry);
+  gtk_widget_set_tooltip_markup (oo_entry,
+                                 _("A comma-separated list of "
+                                   "<b>OPTION=VALUE</b> output-specific "
+                                   "options.  Each option is passed to "
+                                   "virt-v2v as the argument of a separate "
+                                   "<b>-oo</b> option.  Do not place a space "
+                                   "character at either side of either comma "
+                                   "separator."));
+  populate_misc_opts (GTK_ENTRY (oo_entry), config->output.misc);
+  table_attach (output_tbl, oo_entry,
                 1, 2, row, GTK_FILL, GTK_FILL, 1, 1);
 
   gtk_box_pack_start (GTK_BOX (output_vbox), output_tbl, TRUE, TRUE, 0);
@@ -1354,6 +1374,25 @@ populate_interfaces (GtkTreeView *interfaces_list_p)
   g_object_set (interfaces_col_network, "editable", TRUE, NULL);
   g_signal_connect (interfaces_col_network, "edited",
                     G_CALLBACK (network_edited_callback), interfaces_store);
+}
+
+/**
+ * Populate the C<Misc. options> text entry.
+ */
+static void
+populate_misc_opts (GtkEntry *entry, char * const *misc)
+{
+  char *joined;
+
+  if (misc == NULL)
+    return;
+
+  joined = guestfs_int_join_strings (",", misc);
+  if (joined == NULL)
+    error (EXIT_FAILURE, errno, "malloc");
+
+  gtk_entry_set_text (entry, joined);
+  free(joined);
 }
 
 static void
@@ -2196,6 +2235,12 @@ start_conversion_clicked (GtkWidget *w, gpointer data)
     config->output.storage = strdup (str);
   else
     config->output.storage = NULL;
+
+  str = gtk_entry_get_text (GTK_ENTRY (oo_entry));
+  guestfs_int_free_string_list (config->output.misc);
+  config->output.misc = guestfs_int_split_string (',', str);
+  if (config->output.misc == NULL)
+    error (EXIT_FAILURE, errno, "strdup");
 
   /* Display the UI for conversion. */
   show_running_dialog ();

@@ -175,9 +175,20 @@ first-time virt-p2v user.
  │
  │ Output allocation (-oa): [sparse            ▼]
  │
+ │     Misc. options (-oo): [___________________]
+ │
 
 All output options and paths are relative to the conversion server
 (I<not> to the physical server).
+
+Note that the S<C<Misc. options>> text entry behaves differently from
+the other text entries -- its format is identical to that of the
+C<p2v.output.misc> L<kernel command line|/KERNEL COMMAND LINE
+CONFIGURATION> option.  Namely, the text entry contains a
+comma-separated list of miscellaneous, output-specific options.  (Do
+not put spaces around the commas!)  Each element in the list is of the
+form C<OPTION=VALUE>, and each element is passed to virt-v2v as a
+standalone S<I<-oo OPTION=VALUE>> option.
 
 Finally in the left hand column is an information box giving the
 version of virt-p2v (on the physical server) and virt-v2v (on the
