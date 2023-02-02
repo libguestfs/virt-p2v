@@ -194,6 +194,19 @@ repo --name=rhel8_${minor}_0_appstream --baseurl=$baseurl/AppStream/$arch/os $pr
             # Avoid recommends by default.
             packages_options="--excludeWeakdeps"
             ;;
+        rhel-9.*)
+            minor=$( echo "$repo" | sed 's/rhel-[0-9]*\.\([0-9]*\)/\1/' )
+            baseurl=http://download.devel.redhat.com/released/RHEL-9/9.$minor.0
+            # '$basearch' cannot be used in kickstart, so:
+            arch=`uname -m`
+            repos="$repos
+repo --name=rhel9_${minor}_0_baseos --baseurl=$baseurl/BaseOS/$arch/os $proxy
+repo --name=rhel9_${minor}_0_appstream --baseurl=$baseurl/AppStream/$arch/os $proxy
+repo --name=epel9 --mirrorlist=http://mirrors.fedoraproject.org/mirrorlist?repo=epel-9\\\\&arch=$arch
+"
+            # Avoid recommends by default.
+            packages_options="--excludeWeakdeps"
+            ;;
         *)
             # A custom repo is just a URL.
             ((i++)) ||:
