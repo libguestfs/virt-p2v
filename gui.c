@@ -215,7 +215,8 @@ create_connection_dialog (struct config *config)
   gtk_window_set_resizable (GTK_WINDOW (conn_dlg), FALSE);
 
   /* The main dialog area. */
-  intro = gtk_label_new (_("Connect to a virt-v2v conversion server over SSH:"));
+  intro = gtk_label_new (_("Connect to a virt-v2v conversion server over "
+                           "SSH:"));
   gtk_label_set_line_wrap (GTK_LABEL (intro), TRUE);
   set_padding (intro, 10, 10);
 
@@ -457,7 +458,8 @@ test_connection_clicked (GtkWidget *w, gpointer data)
   if (sscanf (port_str, "%d", &config->remote.port) != 1 ||
       config->remote.port <= 0 || config->remote.port >= 65536) {
     gtk_label_set_text (GTK_LABEL (spinner_message),
-                        _("error: Invalid port number. If in doubt, use \"22\"."));
+                        _("error: Invalid port number. If in doubt, use "
+                          "\"22\"."));
     gtk_widget_grab_focus (port_entry);
     errors++;
   }
@@ -838,7 +840,17 @@ create_conversion_dialog (struct config *config,
   set_alignment (o_label, 1., 0.5);
   o_combo = gtk_combo_box_text_new ();
   gtk_label_set_mnemonic_widget (GTK_LABEL (o_label), o_combo);
-  gtk_widget_set_tooltip_markup (o_combo, _("<b>libvirt</b> means send the converted guest to libvirt-managed KVM on the conversion server.  <b>local</b> means put it in a directory on the conversion server.  <b>rhv</b> means write it to RHV-M/oVirt.  <b>glance</b> means write it to OpenStack Glance.  See the virt-v2v(1) manual page for more information about output options."));
+  gtk_widget_set_tooltip_markup (o_combo,
+                                 _("<b>libvirt</b> means send the converted "
+                                   "guest to libvirt-managed KVM on the "
+                                   "conversion server.  "
+                                   "<b>local</b> means put it in a directory "
+                                   "on the conversion server.  "
+                                   "<b>rhv</b> means write it to RHV-M/oVirt.  "
+                                   "<b>glance</b> means write it to OpenStack "
+                                   "Glance.  "
+                                   "See the virt-v2v(1) manual page for more "
+                                   "information about output options."));
   repopulate_output_combo (config);
   table_attach (output_tbl, o_combo,
                 1, 2, row, GTK_FILL, GTK_FILL, 1, 1);
@@ -850,7 +862,12 @@ create_conversion_dialog (struct config *config,
   set_alignment (oc_label, 1., 0.5);
   oc_entry = gtk_entry_new ();
   gtk_label_set_mnemonic_widget (GTK_LABEL (oc_label), oc_entry);
-  gtk_widget_set_tooltip_markup (oc_entry, _("For <b>libvirt</b> only, the libvirt connection URI, or leave blank to add the guest to the default libvirt instance on the conversion server.  For others, leave this field blank."));
+  gtk_widget_set_tooltip_markup (oc_entry,
+                                 _("For <b>libvirt</b> only, the libvirt "
+                                   "connection URI, or leave blank to add the "
+                                   "guest to the default libvirt instance on "
+                                   "the conversion server.  "
+                                   "For others, leave this field blank."));
   if (config->output.connection != NULL)
     gtk_entry_set_text (GTK_ENTRY (oc_entry), config->output.connection);
   table_attach (output_tbl, oc_entry,
@@ -863,7 +880,12 @@ create_conversion_dialog (struct config *config,
   set_alignment (os_label, 1., 0.5);
   os_entry = gtk_entry_new ();
   gtk_label_set_mnemonic_widget (GTK_LABEL (os_label), os_entry);
-  gtk_widget_set_tooltip_markup (os_entry, _("For <b>local</b>, put the directory name on the conversion server.  For <b>rhv</b>, put the Export Storage Domain (server:/mountpoint).  For others, leave this field blank."));
+  gtk_widget_set_tooltip_markup (os_entry,
+                                 _("For <b>local</b>, put the directory name "
+                                   "on the conversion server.  "
+                                   "For <b>rhv</b>, put the Export Storage "
+                                   "Domain (server:/mountpoint).  "
+                                   "For others, leave this field blank."));
   if (config->output.storage != NULL)
     gtk_entry_set_text (GTK_ENTRY (os_entry), config->output.storage);
   table_attach (output_tbl, os_entry,
@@ -876,7 +898,10 @@ create_conversion_dialog (struct config *config,
   set_alignment (of_label, 1., 0.5);
   of_entry = gtk_entry_new ();
   gtk_label_set_mnemonic_widget (GTK_LABEL (of_label), of_entry);
-  gtk_widget_set_tooltip_markup (of_entry, _("The output disk format, typically <b>raw</b> or <b>qcow2</b>.  If blank, defaults to <b>raw</b>."));
+  gtk_widget_set_tooltip_markup (of_entry,
+                                 _("The output disk format, typically "
+                                   "<b>raw</b> or <b>qcow2</b>.  "
+                                   "If blank, defaults to <b>raw</b>."));
   if (config->output.format != NULL)
     gtk_entry_set_text (GTK_ENTRY (of_entry), config->output.format);
   table_attach (output_tbl, of_entry,
@@ -947,7 +972,9 @@ create_conversion_dialog (struct config *config,
   /* See maybe_identify_click below for what we're doing. */
   g_signal_connect (interfaces_list, "button-press-event",
                     G_CALLBACK (maybe_identify_click), NULL);
-  gtk_widget_set_tooltip_markup (interfaces_list, _("Left click on an interface name to flash the light on the physical interface."));
+  gtk_widget_set_tooltip_markup (interfaces_list,
+                                 _("Left click on an interface name to flash "
+                                   "the light on the physical interface."));
   populate_interfaces (GTK_TREE_VIEW (interfaces_list));
   scrolled_window_add_with_viewport (interfaces_sw, interfaces_list);
   gtk_container_add (GTK_CONTAINER (interfaces_frame), interfaces_sw);
@@ -1273,7 +1300,9 @@ populate_interfaces (GtkTreeView *interfaces_list_p)
                     "%s\n"
                     "%s"
                     "</small>\n"
-                    "<small><u><span foreground=\"blue\">Identify interface</span></u></small>",
+                    "<small><u><span foreground=\"blue\">"
+                    "Identify interface"
+                    "</span></u></small>",
                     if_name,
                     if_addr ? : _("Unknown"),
                     if_vendor ? : _("Unknown")) == -1)
@@ -1699,7 +1728,8 @@ vcpus_or_memory_check_callback (GtkWidget *w, gpointer data)
     gtk_widget_show (vcpus_warning);
 
     warning = concat_warning (warning,
-                              _("Number of virtual CPUs is larger than what is supported for KVM (max: %d)."),
+                              _("Number of virtual CPUs is larger than what is "
+                                "supported for KVM (max: %d)."),
                               MAX_SUPPORTED_VCPUS);
   }
   else
@@ -1709,7 +1739,8 @@ vcpus_or_memory_check_callback (GtkWidget *w, gpointer data)
     gtk_widget_show (memory_warning);
 
     warning = concat_warning (warning,
-                              _("Memory size is larger than what is supported for KVM (max: %" PRIu64 ")."),
+                              _("Memory size is larger than what is supported "
+                                "for KVM (max: %" PRIu64 ")."),
                               MAX_SUPPORTED_MEMORY_MB);
   }
   else
@@ -1717,7 +1748,9 @@ vcpus_or_memory_check_callback (GtkWidget *w, gpointer data)
 
   if (warning != NULL) {
     warning = concat_warning (warning,
-                              _("If you ignore this warning, conversion can still succeed, but the guest may not work or may not be supported on the target."));
+                              _("If you ignore this warning, conversion can "
+                                "still succeed, but the guest may not work or "
+                                "may not be supported on the target."));
     gtk_label_set_text (GTK_LABEL (target_warning_label), warning);
   }
   else
@@ -2115,7 +2148,8 @@ start_conversion_clicked (GtkWidget *w, gpointer data)
                                   GTK_MESSAGE_ERROR,
                                   GTK_BUTTONS_OK,
                                   _("No disks were selected for conversion.\n"
-                                    "At least one fixed hard disk must be selected.\n"));
+                                    "At least one fixed hard disk must be "
+                                    "selected.\n"));
     gtk_window_set_title (GTK_WINDOW (dlg), _("Error"));
     gtk_dialog_run (GTK_DIALOG (dlg));
     gtk_widget_destroy (dlg);
