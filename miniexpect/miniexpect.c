@@ -244,7 +244,7 @@ mexp_spawnvf (unsigned flags, const char *file, char **argv)
   return NULL;
 }
 
-enum mexp_status
+int
 mexp_expect (mexp_h *h, const mexp_regexp *regexps,
              pcre2_match_data *match_data)
 {
