@@ -57,10 +57,10 @@ else
     AC_MSG_RESULT([yes])
 fi
 
-dnl Check for List::MoreUtils, used by generate-p2v-config.pl
-AC_MSG_CHECKING([for List::MoreUtils])
-if ! $PERL -MList::MoreUtils -e1 >&AS_MESSAGE_LOG_FD 2>&1; then
-    AC_MSG_ERROR([perl List::MoreUtils must be installed])
+dnl Check for List::Util, used by generate-p2v-config.pl
+AC_MSG_CHECKING([for List::Util])
+if ! $PERL -MList::Util=1.33 -e1 >&AS_MESSAGE_LOG_FD 2>&1; then
+    AC_MSG_ERROR([perl List::Util@1.33 must be installed])
 else
     AC_MSG_RESULT([yes])
 fi

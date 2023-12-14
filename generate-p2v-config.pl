@@ -19,7 +19,7 @@ use warnings;
 
 use Class::Struct;
 use Getopt::Long;
-use List::MoreUtils qw(any);
+use List::Util 1.33 qw(any);
 
 struct ConfigSection =>
 {
