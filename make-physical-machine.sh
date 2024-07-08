@@ -39,7 +39,7 @@ outdir=$(dirname -- "$output")
 disk=$(mktemp -p "$outdir" physical-machine.tmp.XXXXXXXXXX)
 # Delay the SELinux relabeling.
 virt-builder --format raw -o "$disk" --root-password password:p2v-phys \
-  --no-selinux-relabel fedora-35
+  --no-selinux-relabel fedora-39
 
 # Start a guestfish server on the disk image, so that each of the several
 # UUID-manipulation commands below not need a separate guestfish launch.
