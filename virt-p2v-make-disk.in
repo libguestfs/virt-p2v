@@ -289,6 +289,7 @@ virt-builder "$osversion"                                       \
     --edit '/lib/systemd/system/getty@.service:
         s/^ExecStart=(.*)/ExecStart=$1 -a root/
     '                                                           \
+    --copy '/usr/lib/systemd/logind.conf:/etc/systemd/logind.conf' \
     --edit '/etc/systemd/logind.conf:
         s/^[Login]/[Login]\nReserveVT=1\n/
     '                                                           \
