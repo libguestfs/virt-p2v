@@ -265,6 +265,7 @@ run-virt-p2v-directly: $(PHYSICAL_MACHINE)
 
 if HAVE_LIBGUESTFS
 run-virt-p2v-in-a-vm: virt-p2v.img $(PHYSICAL_MACHINE)
+	@echo "*** NOTE: Enable the boot menu and choose USB ***"
 	$(shell guestfish get-hv) \
 	  -M pc,accel=kvm:tcg \
 	  -cpu host \
@@ -285,6 +286,7 @@ run-virt-p2v-in-a-vm: virt-p2v.img $(PHYSICAL_MACHINE)
 	  &
 
 run-virt-p2v-in-an-nvme-vm: virt-p2v.img $(PHYSICAL_MACHINE) $(BLANK_DISK)
+	@echo "*** NOTE: Enable the boot menu and choose USB ***"
 	$(shell guestfish get-hv) \
 	  -M pc,accel=kvm:tcg \
 	  -cpu host \
