@@ -19,7 +19,7 @@
 # freeform string.
 m4_define([p2v_major],   [1])
 m4_define([p2v_minor],   [42])
-m4_define([p2v_release], [3])
+m4_define([p2v_release], [4])
 
 AC_INIT([virt-p2v],p2v_major.p2v_minor.p2v_release)
 
